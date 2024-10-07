@@ -62,6 +62,20 @@ app.post('/api/v1/admin/create', (req, res) => {
     }
 })
 
+app.get('/api/v1/admin/:id', (req, res) => {
+    const sql = 'SELECT * FROM admin WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve Admin data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'Admin not found', res);
+        } else {
+            response(200, result, 'Data From Table Admin', res);
+        }
+    });
+})
+
 app.post('/api/v1/admin/login', (req, res) => {
     const data = req.body;
     const { username, password } = data;
@@ -143,6 +157,20 @@ app.get('/api/v1/article', (req, res) => {
     });
 })
 
+app.get('/api/v1/article/:id', (req, res) => {
+    const sql = 'SELECT * FROM article WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve Article data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'Article not found', res);
+        } else {
+            response(200, result, 'Data From Table Article', res);
+        }
+    });
+})
+
 app.post('/api/v1/article/create', (req, res) => {
     const data = req.body;
     const { title, description, content, kategori } = data;
@@ -205,6 +233,20 @@ app.get('/api/v1/product', (req, res) => {
     });
 })
 
+app.get('/api/v1/product/:id', (req, res) => {
+    const sql = 'SELECT * FROM product WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve Product data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'Product not found', res);
+        } else {
+            response(200, result, 'Data From Table Product', res);
+        }
+    });
+})
+
 app.post('/api/v1/product/create', (req, res) => {
     const data = req.body;
     const { product_name, description, stock, kategori } = data;
@@ -261,6 +303,20 @@ app.get('/api/v1/testimoni', (req, res) => {
     db.query(sql, (err, result) => {
         if (err) {
             response(500, null, 'Failed to retrieve testimoni data', res);
+        } else {
+            response(200, result, 'Data From Table testimoni', res);
+        }
+    });
+})
+
+app.get('/api/v1/testimoni/:id', (req, res) => {
+    const sql = 'SELECT * FROM testimoni WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve testimoni data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'testimoni not found', res);
         } else {
             response(200, result, 'Data From Table testimoni', res);
         }
@@ -329,6 +385,20 @@ app.get('/api/v1/team', (req, res) => {
     });
 })
 
+app.get('/api/v1/team/:id', (req, res) => {
+    const sql = 'SELECT * FROM team WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve team data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'team not found', res);
+        } else {
+            response(200, result, 'Data From Table team', res);
+        }
+    });
+})
+
 app.post('/api/v1/team/create', (req, res) => {
     const data = req.body;
     const { name, email, no_telp, linkedin, instagram, jabatan } = data;
@@ -385,6 +455,20 @@ app.get('/api/v1/about', (req, res) => {
     db.query(sql, (err, result) => {
         if (err) {
             response(500, null, 'Failed to retrieve about data', res);
+        } else {
+            response(200, result, 'Data From Table about', res);
+        }
+    });
+})
+
+app.get('/api/v1/about/:id', (req, res) => {
+    const sql = 'SELECT * FROM about WHERE id = ?';
+    const id = req.params.id;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            response(500, null, 'Failed to retrieve about data', res);
+        } else if (result.length === 0) {
+            response(404, null, 'about not found', res);
         } else {
             response(200, result, 'Data From Table about', res);
         }
