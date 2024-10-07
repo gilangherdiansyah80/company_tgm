@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import response from "./service/response.js"
 import db from "./service/conection.js"
+import bcrypt from "bcrypt"
 
 const app = express()
 const port = 3000
@@ -29,35 +30,89 @@ app.get('/api/v1/admin', (req, res) => {
 app.post('/api/v1/admin/create', (req, res) => {
     const data = req.body;
     const { username, password } = data;
-    let sql = `INSERT INTO admin (username, password) VALUES (?, ?)`;
-    let params = [username, password];
 
-    db.query(sql, params, (err, result) => {
-        if (err) {
-            console.error('Failed to insert Admin record', err);
-            res.status(500).json({ message: 'Failed to insert Admin record' });
-        } else {
-            console.log('Admin record inserted successfully');
-            res.status(201).json({ message: 'Admin created successfully' });
-        }
-    });
+    try {
+        // Cek apakah username sudah ada
+        const sql = "SELECT * FROM admin WHERE username = ?";
+        db.query(sql, [username], (err, result) => {
+            if (err) {
+                response(500, null, 'Failed to retrieve Admin data', res);
+            } else if (result.length > 0) {
+                response(400, null, 'Username already exists', res);
+            } else {
+                // Jika username belum ada, lanjutkan pengecekan password
+                bcrypt.hash(password, 14, (err, hash) => {
+                    if (err) {
+                        response(500, null, 'Failed to hash password', res);
+                    } else {
+                        const sql = "INSERT INTO admin (username, password) VALUES (?, ?)";
+                        db.query(sql, [username, hash], (err, result) => {
+                            if (err) {
+                                response(500, null, 'Failed to insert Admin record', res);
+                            } else {
+                                res.status(201).json({ message: 'Admin created successfully', id: result.insertId });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        response(500, null, 'Internal server error', res);
+    }
+})
+
+app.post('/api/v1/admin/login', (req, res) => {
+    const data = req.body;
+    const { username, password } = data;
+
+    try {
+        const sql = "SELECT * FROM admin WHERE username = ?";
+        db.query(sql, [username], (err, result) => {
+            if (err) {
+                response(500, null, 'Failed to retrieve Admin data', res);
+            } else if (result.length === 0) {
+                response(400, null, 'Username not found', res);
+            } else {
+                const storedPassword = result[0].password;
+                bcrypt.compare(password, storedPassword, (err, match) => {
+                    if (err) {
+                        response(500, null, 'Failed to compare password', res);
+                    } else if (!match) {
+                        response(400, null, 'Wrong password', res);
+                    } else {
+                        res.status(200).json({ message: 'Login successful', id: result[0].id });
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        response(500, null, 'Internal server error', res);
+    }
 })
 
 app.put('/api/v1/admin/update/:id', (req, res) => {
     const id = req.params.id
     const { username, password } = req.body
-    const sql = 'UPDATE admin SET username = ?, password = ? WHERE id = ?'
-    db.query(sql, [username, password, id], (err, result) => {
-        if (err) {
-            res.status(500).send({ message: 'Error updating Admin', error: err });
-            return;
-        }
-        if (result.affectedRows === 0) {
-            res.status(404).send({ message: 'No Admin found with this ID' });
-            return;
-        }
-        res.send({ message: `Admin with ID ${id} has been updated successfully` });
-    });
+
+    try {
+        bcrypt.hash(password, 14, (err, hash) => {
+            if (err) {
+                response(500, null, 'Failed to hash password', res);
+            } else {
+                const sql = 'UPDATE admin SET username = ?, password = ? WHERE id = ?'
+                db.query(sql, [username, hash, id], (err, result) => {
+                    if (err) {
+                        response(500, null, 'Failed to insert Admin record', res);
+                    } else {
+                        res.status(201).json({ message: 'Data updated successfully' });
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        response(500, null, 'Internal server error', res);
+    }
 })
 
 app.delete('/api/v1/admin/delete/:id', (req, res) => {
