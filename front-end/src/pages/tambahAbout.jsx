@@ -61,7 +61,7 @@ const TambahAbout = () => {
             <section className='flex flex-col gap-y-5'>
                 <h1 className='text-center text-2xl font-bold'>Tambah About</h1>
 
-                <form className="flex flex-col gap-y-5" onSubmit={handleSubmit}>
+                <form className="flex flex-col gap-y-5 md:text-xl" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-y-2">
                         <label htmlFor="title" className="text-black font-bold">Judul</label>
                         <input 
@@ -87,15 +87,24 @@ const TambahAbout = () => {
                             required 
                         />
                     </div>
-                    <div>
-                        <button className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-black p-3 rounded-lg w-full text-xl" type="submit">Submit</button>
+                    <div className="flex gap-x-3 w-full">
+                        <button
+                            type="button"
+                            className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl"
+                            onClick={() => navigate('/about')}
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" className="bg-green-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl">
+                            Submit
+                        </button>
                     </div>
                 </form>
             </section>
 
             {aboutAdded && (
                 <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-                    <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+                    <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
                         <h2 className="text-2xl font-semibold">About telah ditambahkan</h2>
                         <i className="fas fa-check-circle text-5xl text-green-500"></i>
                     </div>

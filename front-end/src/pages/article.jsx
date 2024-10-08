@@ -66,18 +66,18 @@ const Article = () => {
     return (
         <AuthLayout>
             <header className="flex justify-between items-center">
-                    <p className="text-xl font-semibold">Hi, admin have a nice day</p>
+                    <p className="text-xl font-semibold md:text-2xl">Hi, admin have a nice day</p>
                     <Link to="/tambahArticle">
-                        <i className="fas fa-plus text-black text-xl"></i>
+                        <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
                     </Link>
                 </header>
 
                 <section className="flex flex-col gap-y-5 items-center">
-                    <h1 className="text-xl font-bold">Article</h1>
+                    <h1 className="text-xl font-bold md:text-2xl">Article</h1>
 
-                    <div className='w-full flex flex-col gap-y-5'>
+                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5'>
                         {dataArticle.map((item, index) => (
-                            <div key={item.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3'>
+                            <div key={item.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl'>
                                 <p className='text-center text-2xl font-bold'>Article #{index + 1}</p>
                                 <p>{item.title}</p>
                                 <p>{item.description}</p>

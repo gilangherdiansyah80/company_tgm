@@ -57,11 +57,6 @@ const EditUser = () => {
 
     return (
         <AuthLayout>
-            <header className="flex justify-between items-center">
-                <p className="text-xl font-semibold">Hi, admin have a nice day</p>
-                <i className="fas fa-user text-black text-xl"></i>
-            </header>
-
             <section className="flex flex-col gap-y-5 items-center w-full">
                 <h1 className="text-xl font-bold">Edit Pesanan</h1>
 
@@ -69,36 +64,36 @@ const EditUser = () => {
                     {dataUser && (
                         <form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
                             <div className="flex flex-col gap-y-3">
-                                <label htmlFor="username" className="font-bold">Username</label>
+                                <label htmlFor="username" className="font-bold md:text-xl">Username</label>
                                 <input
                                     type="text"
                                     name="username"
                                     id="username"
                                     onChange={handleChange}
-                                    className="border-black border-2 rounded-md p-2"
+                                    className="border-black border-2 rounded-md p-2 md:text-xl"
                                     value={updateUser.username}
                                 />
                             </div>
                             <div className="flex flex-col gap-y-3">
-                                <label htmlFor="time_start">Password</label>
+                                <label htmlFor="time_start" className="md:text-xl">Password</label>
                                 <input
                                     type="password"
                                     name="password"
                                     id="password"
                                     onChange={handleChange}
-                                    className="border-black border-2 rounded-md p-2"
+                                    className="border-black border-2 rounded-md p-2 md:text-xl"
                                 />
                             </div>
 
                             <div className="flex gap-x-3 w-full">
                                 <button
                                     type="button"
-                                    className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2"
+                                    className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl"
                                     onClick={() => navigate('/users')}
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="bg-green-500 px-5 py-2 rounded-lg text-white w-1/2">
+                                <button type="submit" className="bg-green-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl">
                                     Save
                                 </button>
                             </div>

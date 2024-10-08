@@ -69,7 +69,7 @@ const TambahTeam = () => {
             <section className='flex flex-col gap-y-5'>
                 <h1 className='text-center text-2xl font-bold'>Tambah Team</h1>
 
-                <form className="flex flex-col gap-y-5" onSubmit={handleSubmit}>
+                <form className="flex flex-col gap-y-5 md:text-xl" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-y-2">
                         <label htmlFor="name" className="text-black font-bold">Nama</label>
                         <input 
@@ -148,8 +148,17 @@ const TambahTeam = () => {
                             required 
                         />
                     </div>
-                    <div>
-                        <button className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-black p-3 rounded-lg w-full text-xl" type="submit">Submit</button>
+                    <div className="flex gap-x-3 w-full">
+                        <button
+                            type="button"
+                            className="bg-red-500 px-5 py-2 md:px-6 md:py-4 rounded-lg text-white w-1/2 md:text-xl"
+                            onClick={() => navigate('/team')}
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" className="bg-green-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl">
+                            Submit
+                        </button>
                     </div>
                 </form>
             </section>

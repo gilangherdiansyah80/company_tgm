@@ -47,21 +47,22 @@ const Login = () => {
 
     return (
         <div className="bg-gradient-to-l from-[#67BD5E] to-[#467840] p-3 flex flex-col gap-y-10 h-screen w-full items-center justify-center">
-            <main className="flex flex-col justify-center items-center gap-y-10">
-                <section className="bg-white p-3 flex justify-center items-center rounded-full h-20 w-20">
-                    <img src="images/logo.png" alt="tgm" />
+            <main className="flex flex-col justify-center items-center gap-y-10 w-full lg:flex-row lg:gap-x-5">
+                <section className="flex flex-col gap-y-3 justify-center items-center lg:w-1/2">
+                    <div className="bg-white p-3 lg:p-5 flex flex-col justify-center items-center rounded-full h-20 w-20 md:w-52 md:h-52">
+                        <img src="images/logo.png" alt="tgm" />
+                    </div>
+                    <article className="text-center text-white font-bold md:text-2xl">Selamat Datang Admin silahkan isi form dibawah ini untuk login</article>
                 </section>
 
-                <section className="flex flex-col gap-y-5">
-                    <article className="text-center text-white font-bold">Selamat Datang Admin silahkan isi form dibawah ini untuk login</article>
-
+                <section className="flex flex-col gap-y-5 w-full lg:w-1/2">
                     <form className="flex flex-col gap-y-5" onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-y-2">
-                            <label htmlFor="username" className="text-white font-bold">Username</label>
+                            <label htmlFor="username" className="text-white font-bold md:text-2xl">Username</label>
                             <input type="text" name="username" id="username" placeholder="Input your username" className="p-3 rounded-lg" value={dataForm.username} onChange={handleChange} />
                         </div>
                         <div className="flex flex-col gap-y-2">
-                            <label htmlFor="password" className="text-white font-bold">Password</label>
+                            <label htmlFor="password" className="text-white font-bold md:text-2xl">Password</label>
                             <div className="flex items-center relative">
                                 <input type="password" className="p-3 rounded-lg w-full text-black" id="password" placeholder="*******" value={dataForm.password} onChange={handleChange} />
                                 <i className="fa fa-fw fa-eye absolute right-3 cursor-pointer text-gray-500" onClick={handleOpenPassword}></i>

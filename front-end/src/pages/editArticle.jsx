@@ -61,18 +61,13 @@ const EditArticle = () => {
 
     return (
         <AuthLayout>
-            <header className="flex justify-between items-center">
-                <p className="text-xl font-semibold">Hi, admin have a nice day</p>
-                <i className="fas fa-user text-black text-xl"></i>
-            </header>
-
             <section className="flex flex-col gap-y-5 items-center w-full">
-                <h1 className="text-xl font-bold">Edit Pesanan</h1>
+                <h1 className="text-xl font-bold md:text-2xl">Edit Pesanan</h1>
 
                 <div className="flex flex-col gap-y-3 w-full">
                     {dataArticle && (
                         <form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="title" className="text-black font-bold">Judul Artikel</label>
                                 <input 
                                     type="text" 
@@ -85,7 +80,7 @@ const EditArticle = () => {
                                     required 
                                 />
                             </div>
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="description" className="text-black font-bold">Description</label>
                                 <textarea 
                                     name="description" 
@@ -97,7 +92,7 @@ const EditArticle = () => {
                                     required 
                                 />
                             </div>
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="content" className="text-black font-bold">Isi Artikel</label>
                                 <textarea 
                                     name="content" 
@@ -109,7 +104,7 @@ const EditArticle = () => {
                                     required 
                                 />
                             </div>
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="kategori" className="text-black font-bold">kategori</label>
                                 <input 
                                     type="text" 
@@ -123,10 +118,10 @@ const EditArticle = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-x-3 w-full">
+                            <div className="flex gap-x-3 w-full md:text-xl">
                                 <button
                                     type="button"
-                                    className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2"
+                                    className="bg-red-500 px-5 py-2 md:px-6 md:py-4 rounded-lg text-white w-1/2"
                                     onClick={() => navigate('/article')}
                                 >
                                     Cancel

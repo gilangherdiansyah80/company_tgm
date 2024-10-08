@@ -59,18 +59,13 @@ const EditTestimoni = () => {
 
     return (
         <AuthLayout>
-            <header className="flex justify-between items-center">
-                <p className="text-xl font-semibold">Hi, admin have a nice day</p>
-                <i className="fas fa-user text-black text-xl"></i>
-            </header>
-
             <section className="flex flex-col gap-y-5 items-center w-full">
-                <h1 className="text-xl font-bold">Edit Testimoni</h1>
+                <h1 className="text-xl font-bold md:text-2xl">Edit Testimoni</h1>
 
                 <div className="flex flex-col gap-y-3 w-full">
                     {dataTestimoni && (
                         <form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="username" className="text-black font-bold">Username</label>
                                 <input 
                                     type="text" 
@@ -83,7 +78,7 @@ const EditTestimoni = () => {
                                     required 
                                 />
                             </div>
-                            <div className="flex flex-col gap-y-2">
+                            <div className="flex flex-col gap-y-2 md:text-xl">
                                 <label htmlFor="description" className="text-black font-bold">Description</label>
                                 <textarea 
                                     name="description" 
@@ -96,7 +91,7 @@ const EditTestimoni = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-x-3 w-full">
+                            <div className="flex gap-x-3 w-full md:text-xl">
                                 <button
                                     type="button"
                                     className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2"

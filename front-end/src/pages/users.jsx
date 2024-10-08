@@ -66,26 +66,26 @@ const Users = () => {
     return (
         <AuthLayout>
             <header className="flex justify-between items-center">
-                    <p className="text-xl font-semibold">Hi, admin have a nice day</p>
+                    <p className="text-xl font-semibold md:text-2xl">Hi, admin have a nice day</p>
                     <Link to="/tambahuser">
-                        <i className="fas fa-plus text-black text-xl"></i>
+                        <i className="fas fa-plus text-black text-xl md:text-2x;"></i>
                     </Link>
                 </header>
 
                 <section className="flex flex-col gap-y-5 items-center">
-                    <h1 className="text-xl font-bold">Users</h1>
+                    <h1 className="text-xl font-bold md:text-2xl">Users</h1>
 
-                    <div className='w-full flex flex-col gap-y-5'>
+                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5'>
                         {dataUsers.map((user, index) => (
                             <div key={user.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3'>
-                                <p className='text-center text-2xl font-bold'>Admin #{index + 1}</p>
-                                <p>Username : {user.username}</p>
+                                <h2 className='text-center text-2xl font-bold'>Admin #{index + 1}</h2>
+                                <p className='md:text-xl'>Username : {user.username}</p>
                                 <div className='flex w-full gap-x-3'>
-                                    <Link to={`/edituser/${user.id}`} className='w-1/2 bg-white p-3 text-black rounded-lg text-center'>
+                                    <Link to={`/edituser/${user.id}`} className='w-1/2 bg-white p-3 text-black rounded-lg text-center md:text-xl'>
                                         <button>Edit User</button>
                                     </Link>
                                     <button
-                                        className="bg-red-700 rounded-lg p-3 text-white w-1/2"
+                                        className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
                                         onClick={() => confirmDelete(user.id)}
                                     >
                                         Hapus User
@@ -98,7 +98,7 @@ const Users = () => {
 
                 {isDeletePopupOpen && (
                     <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-                        <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+                        <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
                             <h2 className="text-2xl font-semibold">Apakah anda yakin ingin menghapus user ini?</h2>
                             <div className="flex justify-center gap-5">
                                 <button
@@ -120,7 +120,7 @@ const Users = () => {
 
                 {afterDelete && (
                     <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-                        <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+                        <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
                             <h2 className="text-2xl font-semibold">User has been deleted</h2>
                             <i className="fas fa-check-circle text-5xl text-green-500"></i>
                         </div>

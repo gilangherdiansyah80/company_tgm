@@ -66,36 +66,36 @@ const Team = () => {
     return (
         <AuthLayout>
             <header className="flex justify-between items-center">
-                    <p className="text-xl font-semibold">Hi, admin have a nice day</p>
+                    <p className="text-xl font-semibold md:text-2xl">Hi, admin have a nice day</p>
                     <Link to="/tambahTeam">
-                        <i className="fas fa-plus text-black text-xl"></i>
+                        <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
                     </Link>
                 </header>
 
                 <section className="flex flex-col gap-y-5 items-center">
-                    <h1 className="text-xl font-bold">Team</h1>
+                    <h1 className="text-xl font-bold md:text-2xl">Team</h1>
 
-                    <div className='w-full flex flex-col gap-y-5'>
+                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5'>
                         {dataTeam.map((item, index) => (
-                            <div key={item.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3'>
+                            <div key={item.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl'>
                                 <p className='text-center text-2xl font-bold'>Team #{index + 1}</p>
                                 <p>{item.name}</p>
                                 <p>{item.jabatan}</p>
                                 <div className='flex gap-x-3 justify-center'>
                                     <a href={`https://mail.google.com/mail/u/0/${item.email}`} target='_blank'>
-                                        <i className="fab fa-mailchimp text-2xl"></i>
+                                        <i className="fab fa-mailchimp text-2xl md:text-4xl"></i>
                                     </a>
                                     <a href={`https://wa.me/+${item.no_telp}`} target='_blank'>
-                                        <i className="fab fa-whatsapp text-2xl"></i>
+                                        <i className="fab fa-whatsapp text-2xl md:text-4xl"></i>
                                     </a>
                                     <a href={`https://www.linkedin.com/in/${item.linkedin}/`} target='_blank'>
-                                        <i className="fab fa-linkedin text-2xl"></i>
+                                        <i className="fab fa-linkedin text-2xl md:text-4xl"></i>
                                     </a>
                                     <a href={`https://www.instagram.com/${item.instagram}`} target='_blank'>
-                                        <i className="fab fa-instagram text-2xl"></i>
+                                        <i className="fab fa-instagram text-2xl md:text-4xl"></i>
                                     </a>
                                 </div>
-                                <div className='flex w-full gap-x-3'>
+                                <div className='flex w-full gap-x-3 md:text-xl'>
                                     <Link to={`/editteam/${item.id}`} className='w-1/2 bg-white p-3 text-black rounded-lg text-center'>
                                         <button>Edit Team</button>
                                     </Link>
@@ -113,9 +113,9 @@ const Team = () => {
 
                 {isDeletePopupOpen && (
                     <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-                        <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+                        <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
                             <h2 className="text-2xl font-semibold">Apakah anda yakin ingin menghapus Team ini?</h2>
-                            <div className="flex justify-center gap-5">
+                            <div className="flex justify-center gap-5 md:text-xl">
                                 <button
                                     onClick={proceedDelete}
                                     className="text-white px-4 py-2 rounded-lg bg-red-700"
@@ -135,7 +135,7 @@ const Team = () => {
 
                 {afterDelete && (
                     <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-                        <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+                        <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
                             <h2 className="text-2xl font-semibold">Team has been deleted</h2>
                             <i className="fas fa-check-circle text-5xl text-green-500"></i>
                         </div>
