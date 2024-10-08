@@ -94,7 +94,7 @@ const EditTestimoni = () => {
                             <div className="flex gap-x-3 w-full md:text-xl">
                                 <button
                                     type="button"
-                                    className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2"
+                                    className="bg-red-500 px-5 py-2 md:px-6 md:py-4 rounded-lg text-white w-1/2"
                                     onClick={() => navigate('/testimoni')}
                                 >
                                     Cancel

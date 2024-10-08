@@ -101,7 +101,7 @@ const TambahUser = () => {
                     <div className="flex gap-x-3 w-full">
                                 <button
                                     type="button"
-                                    className="bg-red-500 px-5 py-2 rounded-lg text-white w-1/2 md:text-xl"
+                                    className="bg-red-500 px-5 py-2 md:px-6 md:py-4 rounded-lg text-white w-1/2 md:text-xl"
                                     onClick={() => navigate('/users')}
                                 >
                                     Cancel
