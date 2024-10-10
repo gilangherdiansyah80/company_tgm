@@ -7,9 +7,10 @@ const TambahProduct = () => {
         product_name: '',
         description: '',
         stock: '',
-        kategori: ''
+        kategori: '',
     })
-    const [productAdded, setproductAdded] = useState(false)
+    const [imageFile, setImageFile] = useState(null)  // Tambahkan state untuk gambar
+    const [productAdded, setProductAdded] = useState(false)
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -19,30 +20,35 @@ const TambahProduct = () => {
         })
     }
 
+    const handleImageChange = (e) => {
+        setImageFile(e.target.files[0])  // Menyimpan file gambar yang di-upload
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
-        
+
+        const formData = new FormData()
+        formData.append('product_name', dataForm.product_name)
+        formData.append('description', dataForm.description)
+        formData.append('stock', dataForm.stock)
+        formData.append('kategori', dataForm.kategori)
+        if (imageFile) {
+            formData.append('image', imageFile)  // Tambahkan gambar ke formData
+        }
+
         try {
             const response = await fetch("http://localhost:3000/api/v1/product/create", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product_name: dataForm.product_name,
-                    description: dataForm.description,
-                    stock: dataForm.stock,
-                    kategori: dataForm.kategori,
-                }),
+                body: formData,  // Kirim formData
             })
             const data = await response.json()
             if (response.ok) {
-                setproductAdded(true)
+                setProductAdded(true)
                 setTimeout(() => {
                     navigate('/product')  // Redirect menggunakan useNavigate
                 }, 3000);  // Redirect setelah 3 detik
             } else {
-                alert('Gagal Menambahkan User');
+                alert('Gagal Menambahkan Product');
                 console.log(`Error: ${data.message}`);
             }
         } catch (error) {
@@ -54,7 +60,7 @@ const TambahProduct = () => {
         let timer;
         if (productAdded) {
             timer = setTimeout(() => {
-                setproductAdded(false);
+                setProductAdded(false);
             }, 3000);
         }
         return () => clearTimeout(timer); // Cleanup saat komponen tidak lagi di-render
@@ -65,14 +71,14 @@ const TambahProduct = () => {
             <section className='flex flex-col gap-y-5'>
                 <h1 className='text-center text-2xl font-bold'>Tambah Product</h1>
 
-                <form className="flex flex-col gap-y-5" onSubmit={handleSubmit}>
+                <form className="flex flex-col gap-y-5" onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="flex flex-col gap-y-2">
                         <label htmlFor="product_name" className="text-black font-bold md:text-xl">Product Name</label>
                         <input 
                             type="text" 
                             name="product_name" 
                             id="product_name" 
-                            placeholder="Input your product_name" 
+                            placeholder="Input your product name" 
                             className="p-3 rounded-lg border-black border-2 md:text-xl" 
                             value={dataForm.product_name} 
                             onChange={handleChange} 
@@ -92,20 +98,20 @@ const TambahProduct = () => {
                         />
                     </div>
                     <div className="flex flex-col gap-y-2">
-                        <label htmlFor="stock" className="text-black font-bold md:text-xl">Stok</label>
+                        <label htmlFor="stock" className="text-black font-bold md:text-xl">Stock</label>
                         <input 
                             type="number" 
                             name="stock" 
                             id="stock" 
                             placeholder="Input your stock" 
                             className="p-3 rounded-lg border-black border-2 md:text-xl" 
-                            value={dataForm.stok} 
+                            value={dataForm.stock} 
                             onChange={handleChange} 
                             required 
                         />
                     </div>
                     <div className="flex flex-col gap-y-2">
-                        <label htmlFor="kategori" className="text-black font-bold md:text-xl">kategori</label>
+                        <label htmlFor="kategori" className="text-black font-bold md:text-xl">Kategori</label>
                         <input 
                             type="text" 
                             name="kategori" 
@@ -115,6 +121,16 @@ const TambahProduct = () => {
                             value={dataForm.kategori} 
                             onChange={handleChange} 
                             required 
+                        />
+                    </div>
+                    <div className="flex flex-col gap-y-2">
+                        <label htmlFor="image" className="text-black font-bold md:text-xl">Upload Gambar</label>
+                        <input 
+                            type="file" 
+                            name="image" 
+                            id="image" 
+                            className="p-3 rounded-lg border-black border-2 md:text-xl"
+                            onChange={handleImageChange}  // Handle perubahan gambar
                         />
                     </div>
                     <div className="flex gap-x-3 w-full">

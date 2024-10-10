@@ -75,7 +75,7 @@ const Users = () => {
                 <section className="flex flex-col gap-y-5 items-center">
                     <h1 className="text-xl font-bold md:text-2xl">Users</h1>
 
-                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5'>
+                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5s xl:grid-cols-3 xl:gap-5'>
                         {dataUsers.map((user, index) => (
                             <div key={user.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3'>
                                 <h2 className='text-center text-2xl font-bold'>Admin #{index + 1}</h2>

@@ -3,6 +3,8 @@ import cors from "cors"
 import response from "./service/response.js"
 import db from "./service/conection.js"
 import bcrypt from "bcrypt"
+import multer from "multer"
+import data from "sanitize-html"
 
 const app = express()
 const port = 3000
@@ -172,7 +174,7 @@ app.get('/api/v1/article/:id', (req, res) => {
 })
 
 app.post('/api/v1/article/create', (req, res) => {
-    const data = req.body;
+    const data = sanitizeHtml(req.body);
     const { title, description, content, kategori } = data;
     let sql = `INSERT INTO article (title, description, content, kategori) VALUES (?, ?, ?, ?)`;
     let params = [title, description, content, kategori];
@@ -247,16 +249,30 @@ app.get('/api/v1/product/:id', (req, res) => {
     });
 })
 
-app.post('/api/v1/product/create', (req, res) => {
+// Setup multer untuk menyimpan file sementara di folder public/images
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './public/images')
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.originalname)
+    }
+})
+
+const upload = multer({ storage: storage })
+
+app.post('/api/v1/product/create', upload.single('image'), (req, res) => {
     const data = req.body;
     const { product_name, description, stock, kategori } = data;
-    let sql = `INSERT INTO product (product_name, description, stock, kategori) VALUES (?, ?, ?, ?)`;
-    let params = [product_name, description, stock, kategori];
+    let image = req.file.originalname ? req.file.path : null
+
+    let sql = `INSERT INTO product (image, product_name, description, stock, kategori) VALUES (?, ?, ?, ?, ?)`;
+    let params = [image, product_name, description, stock, kategori];
 
     db.query(sql, params, (err, result) => {
         if (err) {
             console.error('Failed to insert product record', err);
-            res.status(500).json({ message: 'Failed to insert product record' });
+            res.status(500).json({ message: 'Failed to insert product record' })
         } else {
             console.log('product record inserted successfully');
             res.status(201).json({ message: 'product created successfully' });

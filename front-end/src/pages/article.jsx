@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AuthLayout from '../component/layouts/AuthLayout'
+import parse from 'html-react-parser';
 
 const Article = () => {
     const [dataArticle, setDataArticle] = useState([])
@@ -75,13 +76,13 @@ const Article = () => {
                 <section className="flex flex-col gap-y-5 items-center">
                     <h1 className="text-xl font-bold md:text-2xl">Article</h1>
 
-                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5'>
+                    <div className='w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5'>
                         {dataArticle.map((item, index) => (
                             <div key={item.id} className='bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl'>
                                 <p className='text-center text-2xl font-bold'>Article #{index + 1}</p>
                                 <p>{item.title}</p>
                                 <p>{item.description}</p>
-                                <p>{item.content}</p>
+                                <div>{parse(item.content)}</div>
                                 <div className='flex justify-between'>
                                     <p>Create : {item.create_at.slice(0, 10)}</p>
                                     <p>Kategori : {item.kategori}</p>

@@ -47,7 +47,7 @@ const Login = () => {
 
     return (
         <div className="bg-gradient-to-l from-[#67BD5E] to-[#467840] p-3 flex flex-col gap-y-10 h-screen w-full items-center justify-center">
-            <main className="flex flex-col justify-center items-center gap-y-10 w-full lg:flex-row lg:gap-x-5">
+            <main className="flex flex-col justify-center items-center gap-y-10 w-full lg:flex-row lg:gap-x-5 xl:w-3/5 xl:gap-x-7">
                 <section className="flex flex-col gap-y-3 justify-center items-center lg:w-1/2">
                     <div className="bg-white p-3 lg:p-5 flex flex-col justify-center items-center rounded-full h-20 w-20 md:w-52 md:h-52">
                         <img src="images/logo.png" alt="tgm" />

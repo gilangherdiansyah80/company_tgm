@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
-import AuthLayout from '../component/layouts/AuthLayout'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react';
+import AuthLayout from '../component/layouts/AuthLayout';
+import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const TambahArticle = () => {
     const [dataForm, setDataForm] = useState({
@@ -8,19 +10,26 @@ const TambahArticle = () => {
         description: '',
         content: '',
         kategori: ''
-    })
-    const [articleAdded, setArticleAdded] = useState(false)
+    });
+    const [articleAdded, setArticleAdded] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setDataForm({
             ...dataForm,
             [e.target.id]: e.target.value
-        })
-    }
+        });
+    };
+
+    const handleContentChange = (value) => {
+        setDataForm((prev) => ({
+            ...prev,
+            content: value
+        }));
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         
         try {
             const response = await fetch("http://localhost:3000/api/v1/article/create", {
@@ -28,27 +37,23 @@ const TambahArticle = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    title: dataForm.title,
-                    description: dataForm.description,
-                    content: dataForm.content,
-                    kategori: dataForm.kategori,
-                }),
-            })
-            const data = await response.json()
+                body: JSON.stringify(dataForm),
+            });
+            const data = await response.json();
             if (response.ok) {
-                setArticleAdded(true)
+                setArticleAdded(true);
                 setTimeout(() => {
-                    navigate('/article')  // Redirect menggunakan useNavigate
-                }, 3000);  // Redirect setelah 3 detik
+                    navigate('/article');  // Redirect setelah 3 detik
+                }, 3000);
             } else {
-                alert('Gagal Menambahkan User');
-                console.log(`Error: ${data.message}`);
+                alert(`Gagal Menambahkan Artikel: ${data.message}`);
+                console.error(`Error: ${data.message}`);
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error:", error);
+            alert('Terjadi kesalahan saat menambahkan artikel.');
         }
-    }
+    };
 
     useEffect(() => {
         let timer;
@@ -80,7 +85,7 @@ const TambahArticle = () => {
                         />
                     </div>
                     <div className="flex flex-col gap-y-2 md:text-xl">
-                        <label htmlFor="description" className="text-black font-bold">Description</label>
+                        <label htmlFor="description" className="text-black font-bold">Deskripsi</label>
                         <textarea 
                             name="description" 
                             id="description" 
@@ -93,18 +98,27 @@ const TambahArticle = () => {
                     </div>
                     <div className="flex flex-col gap-y-2 md:text-xl">
                         <label htmlFor="content" className="text-black font-bold">Isi Artikel</label>
-                        <textarea 
-                            name="content" 
+                        <ReactQuill 
                             id="content" 
-                            placeholder="Input your content" 
-                            className="p-3 rounded-lg border-black border-2" 
+                            placeholder="Input your content"
+                            theme="snow"
+                            modules={{
+                                toolbar: [
+                                    ['bold', 'italic', 'underline'],
+                                    ['link', 'image'],
+                                    [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+                                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                  ],
+                            }}
+                            formats={['header', 'bold', 'italic', 'underline', 'link', 'image', 'list']} // Pastikan 'list' ada
                             value={dataForm.content} 
-                            onChange={handleChange} 
+                            onChange={handleContentChange} 
                             required 
-                        />
+                        /> 
                     </div>
                     <div className="flex flex-col gap-y-2 md:text-xl">
-                        <label htmlFor="kategori" className="text-black font-bold">kategori</label>
+                        <label htmlFor="kategori" className="text-black font-bold">Kategori</label>
                         <input 
                             type="text" 
                             name="kategori" 
@@ -140,7 +154,7 @@ const TambahArticle = () => {
                 </section>
             )}
         </AuthLayout>
-    )
-}
+    );
+};
 
-export default TambahArticle
+export default TambahArticle;
