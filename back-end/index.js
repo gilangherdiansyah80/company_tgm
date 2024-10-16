@@ -184,7 +184,7 @@ app.get("/api/v1/article/:id", (req, res) => {
 });
 
 app.post("/api/v1/article/create", (req, res) => {
-  const data = sanitizeHtml(req.body);
+  const data = req.body;
   const { title, description, content, kategori } = data;
   let sql = `INSERT INTO article (title, description, content, kategori) VALUES (?, ?, ?, ?)`;
   let params = [title, description, content, kategori];
