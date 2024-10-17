@@ -12,6 +12,7 @@ const TambahArticle = () => {
     kategori: "",
   });
   const [articleAdded, setArticleAdded] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,18 +29,28 @@ const TambahArticle = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]); // Menyimpan file gambar yang di-upload
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("title", dataForm.title);
+    formData.append("description", dataForm.description);
+    formData.append("content", dataForm.content);
+    formData.append("kategori", dataForm.kategori);
+    if (imageFile) {
+      formData.append("image", imageFile); // Tambahkan gambar ke formData
+    }
 
     try {
       const response = await fetch(
         "http://localhost:3000/api/v1/article/create",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataForm),
+          body: formData,
         }
       );
       const data = await response.json();
@@ -87,6 +98,19 @@ const TambahArticle = () => {
               value={dataForm.title}
               onChange={handleChange}
               required
+            />
+          </div>
+          <div className="flex flex-col gap-y-2 md:text-xl">
+            <label htmlFor="image" className="text-black font-bold">
+              Upload Gambar
+            </label>
+            <input
+              type="file"
+              name="image"
+              id="image"
+              placeholder="Input your title"
+              className="p-3 rounded-lg border-black border-2"
+              onChange={handleImageChange}
             />
           </div>
           <div className="flex flex-col gap-y-2 md:text-xl">

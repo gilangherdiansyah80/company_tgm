@@ -81,14 +81,16 @@ const Article = () => {
         <h1 className="text-xl font-bold md:text-2xl">Article</h1>
 
         <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
-          {dataArticle.map((item, index) => (
+          {dataArticle.map((item) => (
             <div
               key={item.id}
-              className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl"
+              className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl h-fit"
             >
-              <p className="text-center text-2xl font-bold">
-                Article #{index + 1}
-              </p>
+              <img
+                src={`http://localhost:3000${item.image}`}
+                alt={item.title}
+                className="w-full h-96 bg-center object-cover rounded-xl"
+              />
               <p>{item.title}</p>
               <p>{item.description}</p>
               <div>{parse(item.content)}</div>

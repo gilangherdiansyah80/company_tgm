@@ -22,6 +22,18 @@ app.get("/", (req, res) => {
   res.send("Letscode!");
 });
 
+// Konfigurasi folder penyimpanan untuk gambar
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+
 // Crud Admin
 app.get("/api/v1/admin", (req, res) => {
   const sql = "SELECT * FROM admin";
@@ -169,6 +181,17 @@ app.get("/api/v1/article", (req, res) => {
   });
 });
 
+app.get("/api/v1/article/now", (req, res) => {
+  const sql = "SELECT * FROM article WHERE create_at >= NOW() - INTERVAL 1 DAY";
+  db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve article data", res);
+    } else {
+      response(200, result, "Data From Table article", res);
+    }
+  });
+});
+
 app.get("/api/v1/article/:id", (req, res) => {
   const sql = "SELECT * FROM article WHERE id = ?";
   const id = req.params.id;
@@ -183,11 +206,15 @@ app.get("/api/v1/article/:id", (req, res) => {
   });
 });
 
-app.post("/api/v1/article/create", (req, res) => {
+app.post("/api/v1/article/create", upload.single("image"), (req, res) => {
   const data = req.body;
   const { title, description, content, kategori } = data;
-  let sql = `INSERT INTO article (title, description, content, kategori) VALUES (?, ?, ?, ?)`;
-  let params = [title, description, content, kategori];
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  let sql = `INSERT INTO article (image, title, description, content, kategori) VALUES (?, ?, ?, ?, ?)`;
+  let params = [image, title, description, content, kategori];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -239,18 +266,6 @@ app.delete("/api/v1/article/delete/:id", (req, res) => {
 });
 
 // Crud product
-// Konfigurasi folder penyimpanan untuk gambar
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
-
 app.get("/api/v1/product", (req, res) => {
   const sql = "SELECT * FROM product";
   db.query(sql, (err, result) => {
@@ -298,11 +313,6 @@ app.post("/api/v1/product/create", upload.single("image"), (req, res) => {
     }
   });
 });
-
-console.log(path.join(__dirname, "public/images"));
-
-// Middleware untuk melayani file statis dari folder public
-app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 app.put("/api/v1/product/update/:id", (req, res) => {
   const id = req.params.id;
@@ -372,11 +382,15 @@ app.get("/api/v1/testimoni/:id", (req, res) => {
   });
 });
 
-app.post("/api/v1/testimoni/create", (req, res) => {
+app.post("/api/v1/testimoni/create", upload.single("image"), (req, res) => {
   const data = req.body;
-  const { username, description } = data;
-  let sql = `INSERT INTO testimoni (username, description) VALUES (?, ?)`;
-  let params = [username, description];
+  const { username, jabatan, description } = data;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  let sql = `INSERT INTO testimoni (username, image, jabatan, description) VALUES (?, ?, ?, ?)`;
+  let params = [username, image, jabatan, description];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -452,11 +466,15 @@ app.get("/api/v1/team/:id", (req, res) => {
   });
 });
 
-app.post("/api/v1/team/create", (req, res) => {
+app.post("/api/v1/team/create", upload.single("image"), (req, res) => {
   const data = req.body;
   const { name, email, no_telp, linkedin, instagram, jabatan } = data;
-  let sql = `INSERT INTO team (name, email, no_telp, linkedin, instagram, jabatan) VALUES (?, ?, ?, ?, ?, ?)`;
-  let params = [name, email, no_telp, linkedin, instagram, jabatan];
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  let sql = `INSERT INTO team (name, image, email, no_telp, linkedin, instagram, jabatan) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  let params = [name, image, email, no_telp, linkedin, instagram, jabatan];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -582,6 +600,9 @@ app.delete("/api/v1/about/delete/:id", (req, res) => {
     res.send({ message: `about with ID ${id} has been deleted successfully` });
   });
 });
+
+// Middleware untuk melayani file statis dari folder public
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:3000/`);

@@ -82,14 +82,16 @@ const Team = () => {
         <h1 className="text-xl font-bold md:text-2xl">Team</h1>
 
         <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
-          {dataTeam.map((item, index) => (
+          {dataTeam.map((item) => (
             <div
               key={item.id}
               className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl"
             >
-              <p className="text-center text-2xl font-bold">
-                Team #{index + 1}
-              </p>
+              <img
+                src={`http://localhost:3000${item.image}`}
+                alt={item.name}
+                className="w-full h-96 bg-center object-cover rounded-xl"
+              />
               <p>{item.name}</p>
               <p>{item.jabatan}</p>
               <div className="flex gap-x-3 justify-center">
