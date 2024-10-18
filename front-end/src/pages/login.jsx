@@ -29,6 +29,7 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
+        localStorage.setItem("user", dataForm.username);
         alert("Login Berhasil");
         window.location.href = "/home";
       } else {

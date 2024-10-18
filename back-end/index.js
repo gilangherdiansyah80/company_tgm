@@ -7,7 +7,7 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import sanitizeHtml from "sanitize-html";
+// import sanitizeHtml from "sanitize-html";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,6 +38,19 @@ const upload = multer({ storage: storage });
 app.get("/api/v1/admin", (req, res) => {
   const sql = "SELECT * FROM admin";
   db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve Admin data", res);
+    } else {
+      response(200, result, "Data From Table Admin", res);
+    }
+  });
+});
+
+app.get("/api/v1/admin/:name", (req, res) => {
+  const name = req.params.name;
+  const sql = "SELECT * FROM admin WHERE username = ?";
+
+  db.query(sql, [name], (err, result) => {
     if (err) {
       response(500, null, "Failed to retrieve Admin data", res);
     } else {
@@ -599,6 +612,38 @@ app.delete("/api/v1/about/delete/:id", (req, res) => {
     }
     res.send({ message: `about with ID ${id} has been deleted successfully` });
   });
+});
+
+// visitor
+app.get("/api/v1/visitors", (req, res) => {
+  const sql = "SELECT * FROM visitors";
+  db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve visitor data", res);
+    } else {
+      response(200, result, "Data From Table visitor", res);
+    }
+  });
+});
+
+app.post("/api/v1/visitors/increment", (req, res) => {
+  db.query(
+    "UPDATE visitors SET count = count + 1 WHERE id = 1",
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Error menambah kunjungan" });
+      }
+      // Setelah menambah kunjungan, ambil nilai terbaru
+      db.query("SELECT count FROM visitors WHERE id = 1", (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Error mengambil data terbaru" });
+        }
+        res.json({ count: result[0].count });
+      });
+    }
+  );
 });
 
 // Middleware untuk melayani file statis dari folder public
