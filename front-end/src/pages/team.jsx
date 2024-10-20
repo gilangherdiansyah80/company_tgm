@@ -12,8 +12,6 @@ const Team = () => {
     const response = await fetch("http://localhost:3000/api/v1/team");
     const data = await response.json();
     setDataTeam(data.payload.datas);
-    console.log(data);
-    console.log(data.payload.datas);
   };
 
   const handleDelete = async (id) => {

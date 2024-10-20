@@ -15,6 +15,7 @@ const Home = ({ children }) => {
 
   const handleLogout = () => {
     navigate("/");
+    localStorage.removeItem("user");
   };
   return (
     <div className="bg-gradient-to-l from-[#67BD5E] to-[#467840] min-h-screen p-3 lg:p-10 lg:flex lg:flex-col lg:gap-y-5">

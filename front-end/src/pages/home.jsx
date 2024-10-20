@@ -23,32 +23,66 @@ ChartJS.register(
 const Home = () => {
   const [dataVisitors, setDataVisitors] = useState([]);
 
+  // Fungsi untuk mendapatkan data dari backend
   const getDataVisitors = async () => {
     try {
       const response = await fetch("http://localhost:3000/api/v1/visitors");
       const data = await response.json();
-      setDataVisitors(data.payload.datas); // Pastikan 'datas' adalah array
+      if (data && data.payload && data.payload.datas) {
+        setDataVisitors(data.payload.datas); // Set hasil data ke state
+      } else {
+        console.log("Data tidak tersedia", data); // Log data jika struktur tidak sesuai
+      }
     } catch (err) {
       console.log("Failed to get data visitors", err);
     }
   };
 
   useEffect(() => {
-    getDataVisitors();
+    getDataVisitors(); // Memanggil data ketika komponen di-mount
   }, []);
 
-  // Ambil data 'count' dari dataVisitors dan buat array baru
-  const visitorCounts = dataVisitors.map((visitor) => visitor.count);
+  // Buat array untuk menyimpan jumlah pengunjung per bulan
+  const visitorCounts = Array(12).fill(0); // Inisialisasi dengan 12 bulan
 
-  // Label bulan yang sesuai, misalnya
+  // Mapping nama bulan dari string ke index array (0 = Januari, 1 = Februari, dst.)
+  const monthMapping = {
+    Januari: 0,
+    Februari: 1,
+    Maret: 2,
+    April: 3,
+    Mei: 4,
+    Juni: 5,
+    Juli: 6,
+    Agustus: 7,
+    September: 8,
+    Oktober: 9,
+    November: 10,
+    Desember: 11,
+  };
+
+  // Isi array sesuai bulan berdasarkan hasil dari backend
+  dataVisitors.forEach((visitor) => {
+    const monthIndex = monthMapping[visitor.month]; // Dapatkan index bulan dari mapping
+    if (monthIndex !== undefined) {
+      visitorCounts[monthIndex] = visitor.count || 0; // Pastikan untuk mengatur default ke 0 jika undefined
+    }
+  });
+
+  // Label bulan yang sesuai
   const labels = [
-    "January",
-    "February",
-    "March",
+    "Januari",
+    "Februari",
+    "Maret",
     "April",
-    "May",
-    "June",
-    "July",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
   ];
 
   // Data untuk chart
@@ -57,7 +91,7 @@ const Home = () => {
     datasets: [
       {
         label: "Pengunjung",
-        data: visitorCounts, // Masukkan array count ke data di sini
+        data: visitorCounts, // Masukkan jumlah pengunjung per bulan
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -74,7 +108,7 @@ const Home = () => {
       },
       title: {
         display: true,
-        text: "Daftar Pengunjung",
+        text: "Jumlah Pengunjung per Bulan",
       },
     },
   };
@@ -94,7 +128,7 @@ const Home = () => {
         {/* Render Chart.js Bar chart */}
         <Bar data={data} options={options} />
 
-        {/* Menampilkan data pengunjung secara total */}
+        {/* Menampilkan total pengunjung keseluruhan */}
         <h1>
           Total Data Pengunjung:{" "}
           {visitorCounts.reduce((acc, val) => acc + val, 0)}

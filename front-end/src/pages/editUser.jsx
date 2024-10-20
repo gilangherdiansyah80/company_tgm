@@ -53,11 +53,15 @@ const EditUser = () => {
         body: JSON.stringify(updateUser),
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        localStorage.removeItem("user");
         alert("Data updated successfully!");
-        navigate("/users"); // Redirect ke halaman users setelah update berhasil
+        localStorage.setItem("user", updateUser.username);
+        navigate("/users"); // Navigasi setelah sukses
       } else {
-        alert("Failed to update data");
+        alert("Failed to update data: " + result.message);
       }
     } catch (error) {
       console.error("Error updating user:", error);

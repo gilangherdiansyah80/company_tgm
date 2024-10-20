@@ -142,8 +142,8 @@ app.post("/api/v1/admin/login", (req, res) => {
   }
 });
 
-app.put("/api/v1/admin/update/:id", (req, res) => {
-  const id = req.params.id;
+app.put("/api/v1/admin/update/:username", (req, res) => {
+  const user = req.params.username;
   const { username, password } = req.body;
 
   try {
@@ -151,8 +151,9 @@ app.put("/api/v1/admin/update/:id", (req, res) => {
       if (err) {
         response(500, null, "Failed to hash password", res);
       } else {
-        const sql = "UPDATE admin SET username = ?, password = ? WHERE id = ?";
-        db.query(sql, [username, hash, id], (err, result) => {
+        const sql =
+          "UPDATE admin SET username = ?, password = ? WHERE username = ?";
+        db.query(sql, [username, hash, user], (err, result) => {
           if (err) {
             response(500, null, "Failed to insert Admin record", res);
           } else {
@@ -240,24 +241,32 @@ app.post("/api/v1/article/create", upload.single("image"), (req, res) => {
   });
 });
 
-app.put("/api/v1/article/update/:id", (req, res) => {
+app.put("/api/v1/article/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { title, description, content, kategori } = req.body;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
   const sql =
-    "UPDATE article SET title = ?, description = ?, content = ?, kategori = ? WHERE id = ?";
-  db.query(sql, [title, description, content, kategori, id], (err, result) => {
-    if (err) {
-      res.status(500).send({ message: "Error updating article", error: err });
-      return;
+    "UPDATE article SET image = ?, title = ?, description = ?, content = ?, kategori = ? WHERE id = ?";
+  db.query(
+    sql,
+    [image, title, description, content, kategori, id],
+    (err, result) => {
+      if (err) {
+        res.status(500).send({ message: "Error updating article", error: err });
+        return;
+      }
+      if (result.affectedRows === 0) {
+        res.status(404).send({ message: "No article found with this ID" });
+        return;
+      }
+      res.send({
+        message: `article with ID ${id} has been updated successfully`,
+      });
     }
-    if (result.affectedRows === 0) {
-      res.status(404).send({ message: "No article found with this ID" });
-      return;
-    }
-    res.send({
-      message: `article with ID ${id} has been updated successfully`,
-    });
-  });
+  );
 });
 
 app.delete("/api/v1/article/delete/:id", (req, res) => {
@@ -327,14 +336,18 @@ app.post("/api/v1/product/create", upload.single("image"), (req, res) => {
   });
 });
 
-app.put("/api/v1/product/update/:id", (req, res) => {
+app.put("/api/v1/product/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { product_name, description, stock, kategori } = req.body;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
   const sql =
-    "UPDATE product SET product_name = ?, description = ?, stock = ?, kategori = ? WHERE id = ?";
+    "UPDATE product SET image = ?, product_name = ?, description = ?, stock = ?, kategori = ? WHERE id = ?";
   db.query(
     sql,
-    [product_name, description, stock, kategori, id],
+    [image, product_name, description, stock, kategori, id],
     (err, result) => {
       if (err) {
         res.status(500).send({ message: "Error updating product", error: err });
@@ -416,11 +429,16 @@ app.post("/api/v1/testimoni/create", upload.single("image"), (req, res) => {
   });
 });
 
-app.put("/api/v1/testimoni/update/:id", (req, res) => {
+app.put("/api/v1/testimoni/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
-  const { username, description } = req.body;
-  const sql = "UPDATE testimoni SET username = ?, description = ? WHERE id = ?";
-  db.query(sql, [username, description, id], (err, result) => {
+  const { username, description, jabatan } = req.body;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  const sql =
+    "UPDATE testimoni SET username = ?, description = ?, image = ?, jabatan = ? WHERE id = ?";
+  db.query(sql, [username, description, image, jabatan, id], (err, result) => {
     if (err) {
       res.status(500).send({ message: "Error updating testimoni", error: err });
       return;
@@ -500,14 +518,18 @@ app.post("/api/v1/team/create", upload.single("image"), (req, res) => {
   });
 });
 
-app.put("/api/v1/team/update/:id", (req, res) => {
+app.put("/api/v1/team/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { name, email, no_telp, linkedin, instagram, jabatan } = req.body;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
   const sql =
-    "UPDATE team SET name = ?, email = ?, no_telp = ?, linkedin = ?, instagram = ?, jabatan = ? WHERE id = ?";
+    "UPDATE team SET image = ?, name = ?, email = ?, no_telp = ?, linkedin = ?, instagram = ?, jabatan = ? WHERE id = ?";
   db.query(
     sql,
-    [name, email, no_telp, linkedin, instagram, jabatan, id],
+    [image, name, email, no_telp, linkedin, instagram, jabatan, id],
     (err, result) => {
       if (err) {
         res.status(500).send({ message: "Error updating team", error: err });
@@ -615,33 +637,58 @@ app.delete("/api/v1/about/delete/:id", (req, res) => {
 });
 
 // visitor
+// Route untuk mendapatkan data pengunjung berdasarkan bulan
 app.get("/api/v1/visitors", (req, res) => {
   const sql = "SELECT * FROM visitors";
   db.query(sql, (err, result) => {
     if (err) {
-      response(500, null, "Failed to retrieve visitor data", res);
+      response(500, null, "Failed to retrieve about data", res);
     } else {
-      response(200, result, "Data From Table visitor", res);
+      response(200, result, "Data From Table about", res);
     }
   });
 });
 
 app.post("/api/v1/visitors/increment", (req, res) => {
+  // Ambil nama bulan sekarang dalam format teks (misal: 'Oktober')
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+  const currentMonth = months[new Date().getMonth()]; // Ambil nama bulan dari array
+
+  // Query untuk memperbarui data pengunjung sesuai bulan saat ini
   db.query(
-    "UPDATE visitors SET count = count + 1 WHERE id = 1",
+    "UPDATE visitors SET count = count + 1 WHERE month = ?",
+    [currentMonth],
     (err, result) => {
       if (err) {
         return res.status(500).json({ error: "Error menambah kunjungan" });
       }
-      // Setelah menambah kunjungan, ambil nilai terbaru
-      db.query("SELECT count FROM visitors WHERE id = 1", (err, result) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({ error: "Error mengambil data terbaru" });
+
+      // Setelah menambah kunjungan, ambil nilai terbaru untuk bulan tersebut
+      db.query(
+        "SELECT count FROM visitors WHERE month = ?",
+        [currentMonth],
+        (err, result) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ error: "Error mengambil data terbaru" });
+          }
+          res.json({ month: currentMonth, count: result[0].count });
         }
-        res.json({ count: result[0].count });
-      });
+      );
     }
   );
 });
