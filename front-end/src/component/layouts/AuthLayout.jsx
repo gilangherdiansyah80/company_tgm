@@ -279,6 +279,36 @@ const Home = ({ children }) => {
                     </p>
                   </li>
                 </Link>
+                <Link
+                  to="/images"
+                  className={`text-xl p-3 text-white w-full ${
+                    location.pathname === "/images"
+                      ? "bg-white text-black rounded-xl"
+                      : "hover:text-black hover:bg-white hover:rounded-xl"
+                  }`}
+                  onClick={handleOpen}
+                >
+                  <li
+                    className={`flex items-center gap-x-3 justify-center md:text-2xl`}
+                  >
+                    <i
+                      className={`fas fa-images ${
+                        location.pathname === "/images"
+                          ? "text-black"
+                          : "hover:text-black hover:bg-white hover:rounded-xl"
+                      }`}
+                    ></i>
+                    <p
+                      className={`font-semibold ${
+                        location.pathname === "/images"
+                          ? "text-black"
+                          : "hover:text-black hover:bg-white hover:rounded-xl"
+                      }`}
+                    >
+                      Images
+                    </p>
+                  </li>
+                </Link>
               </ul>
             </nav>
           )}
@@ -490,6 +520,34 @@ const Home = ({ children }) => {
                       }`}
                     >
                       Team
+                    </p>
+                  </li>
+                </Link>
+                <Link
+                  to="/images"
+                  className={`text-xl p-3 text-white w-full ${
+                    location.pathname === "/images"
+                      ? "bg-white text-black rounded-xl"
+                      : "hover:text-black hover:bg-white hover:rounded-xl"
+                  }`}
+                  onClick={handleOpen}
+                >
+                  <li className={`flex items-center gap-x-3 md:text-2xl`}>
+                    <i
+                      className={`fas fa-images ${
+                        location.pathname === "/images"
+                          ? "text-black"
+                          : "hover:text-black hover:bg-white hover:rounded-xl"
+                      }`}
+                    ></i>
+                    <p
+                      className={`font-semibold ${
+                        location.pathname === "/images"
+                          ? "text-black"
+                          : "hover:text-black hover:bg-white hover:rounded-xl"
+                      }`}
+                    >
+                      Images
                     </p>
                   </li>
                 </Link>

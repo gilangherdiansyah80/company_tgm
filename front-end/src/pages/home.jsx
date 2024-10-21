@@ -21,26 +21,51 @@ ChartJS.register(
 );
 
 const Home = () => {
-  const [dataVisitors, setDataVisitors] = useState([]);
+  const currentYear = new Date().getFullYear(); // Ambil tahun saat ini
+  const futureYears = 5; // Tentukan berapa tahun ke depan yang ingin ditampilkan
+  const [dataVisitors, setDataVisitors] = useState([]); // State untuk menyimpan data pengunjung
+  const [selectedYear, setSelectedYear] = useState(currentYear); // Set tahun default ke tahun saat ini
+  const [availableYears, setAvailableYears] = useState([]); // Tahun-tahun yang tersedia
 
-  // Fungsi untuk mendapatkan data dari backend
-  const getDataVisitors = async () => {
+  // Mengisi availableYears secara dinamis dari tahun saat ini hingga futureYears ke depan
+  useEffect(() => {
+    const years = Array.from(
+      { length: futureYears + 1 },
+      (_, i) => currentYear + i
+    );
+    setAvailableYears(years); // Set array tahun ke state
+  }, [currentYear, futureYears]);
+
+  // Fungsi untuk mendapatkan data dari backend berdasarkan tahun
+  const getDataVisitors = async (year) => {
     try {
-      const response = await fetch("http://localhost:3000/api/v1/visitors");
+      const response = await fetch(
+        `http://localhost:3000/api/v1/visitors/${year}` // Ubah sesuai dengan endpoint yang benar
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const data = await response.json();
-      if (data && data.payload && data.payload.datas) {
+
+      if (data && data.payload && data.payload.datas.length > 0) {
         setDataVisitors(data.payload.datas); // Set hasil data ke state
       } else {
-        console.log("Data tidak tersedia", data); // Log data jika struktur tidak sesuai
+        console.log(
+          `Data untuk tahun ${year} belum tersedia. Menampilkan data 0.`
+        );
+        setDataVisitors([]); // Jika data tidak ada, set data kosong
       }
     } catch (err) {
       console.log("Failed to get data visitors", err);
     }
   };
 
+  // Memanggil data ketika komponen di-mount atau ketika tahun berubah
   useEffect(() => {
-    getDataVisitors(); // Memanggil data ketika komponen di-mount
-  }, []);
+    getDataVisitors(selectedYear);
+  }, [selectedYear]);
 
   // Buat array untuk menyimpan jumlah pengunjung per bulan
   const visitorCounts = Array(12).fill(0); // Inisialisasi dengan 12 bulan
@@ -70,28 +95,15 @@ const Home = () => {
   });
 
   // Label bulan yang sesuai
-  const labels = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
+  const labels = Object.keys(monthMapping); // Ambil label bulan dari monthMapping
 
   // Data untuk chart
   const data = {
     labels,
     datasets: [
       {
-        label: "Pengunjung",
-        data: visitorCounts, // Masukkan jumlah pengunjung per bulan
+        label: `Pengunjung Tahun ${selectedYear}`,
+        data: visitorCounts,
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -108,9 +120,14 @@ const Home = () => {
       },
       title: {
         display: true,
-        text: "Jumlah Pengunjung per Bulan",
+        text: `Jumlah Pengunjung per Bulan di Tahun ${selectedYear}`,
       },
     },
+  };
+
+  // Handle perubahan tahun pada dropdown
+  const handleYearChange = (e) => {
+    setSelectedYear(Number(e.target.value));
   };
 
   return (
@@ -119,7 +136,18 @@ const Home = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <i className="fas fa-user text-black text-xl"></i>
+        <select
+          name="years"
+          id="years"
+          value={selectedYear}
+          onChange={handleYearChange} // Update tahun ketika dropdown berubah
+        >
+          {availableYears.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
@@ -130,7 +158,7 @@ const Home = () => {
 
         {/* Menampilkan total pengunjung keseluruhan */}
         <h1>
-          Total Data Pengunjung:{" "}
+          Total Data Pengunjung Tahun {selectedYear} :{" "}
           {visitorCounts.reduce((acc, val) => acc + val, 0)}
         </h1>
       </section>

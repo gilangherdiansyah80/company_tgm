@@ -11,6 +11,7 @@ const EditArticle = () => {
     description: "",
     content: "",
     kategori: "",
+    author: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const { id } = useParams();
@@ -55,6 +56,7 @@ const EditArticle = () => {
     formData.append("description", updateArticle.description);
     formData.append("content", updateArticle.content);
     formData.append("kategori", updateArticle.kategori);
+    formData.append("author", updateArticle.author);
     if (imageFile) {
       formData.append("image", imageFile);
     }
@@ -184,6 +186,22 @@ const EditArticle = () => {
                   placeholder="Input your kategori"
                   className="p-3 rounded-lg border-black border-2"
                   value={updateArticle.kategori}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-y-2 md:text-xl">
+                <label htmlFor="author" className="text-black font-bold">
+                  Author
+                </label>
+                <input
+                  type="text"
+                  name="author"
+                  id="author"
+                  placeholder="Input your author"
+                  className="p-3 rounded-lg border-black border-2"
+                  value={updateArticle.author}
                   onChange={handleChange}
                   required
                 />

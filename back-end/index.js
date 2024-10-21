@@ -196,7 +196,8 @@ app.get("/api/v1/article", (req, res) => {
 });
 
 app.get("/api/v1/article/now", (req, res) => {
-  const sql = "SELECT * FROM article WHERE create_at >= NOW() - INTERVAL 1 DAY";
+  const sql =
+    "SELECT * FROM article WHERE create_at >= NOW() - INTERVAL 1 MONTH";
   db.query(sql, (err, result) => {
     if (err) {
       response(500, null, "Failed to retrieve article data", res);
@@ -204,6 +205,21 @@ app.get("/api/v1/article/now", (req, res) => {
       response(200, result, "Data From Table article", res);
     }
   });
+});
+
+// Route untuk mendapatkan artikel yang paling banyak dikunjungi (rekomendasi)
+app.get("/api/v1/article/recommended", (req, res) => {
+  db.query(
+    "SELECT * FROM article ORDER BY views DESC LIMIT 3",
+    (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ error: "Error mengambil artikel yang direkomendasikan" });
+      }
+      response(200, result, "Data From Table Article", res);
+    }
+  );
 });
 
 app.get("/api/v1/article/:id", (req, res) => {
@@ -220,15 +236,27 @@ app.get("/api/v1/article/:id", (req, res) => {
   });
 });
 
+app.post("/api/v1/article/views/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = "UPDATE article SET views = views + 1 WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      response(500, null, "Failed to update Article views", res);
+    } else {
+      response(200, null, "Article views updated successfully", res);
+    }
+  });
+});
+
 app.post("/api/v1/article/create", upload.single("image"), (req, res) => {
   const data = req.body;
-  const { title, description, content, kategori } = data;
+  const { title, description, content, kategori, author } = data;
 
   // Jika ada file gambar yang diupload
   let image = req.file ? `/images/${req.file.filename}` : null;
 
-  let sql = `INSERT INTO article (image, title, description, content, kategori) VALUES (?, ?, ?, ?, ?)`;
-  let params = [image, title, description, content, kategori];
+  let sql = `INSERT INTO article (image, title, description, content, kategori, author) VALUES (?, ?, ?, ?, ?, ?)`;
+  let params = [image, title, description, content, kategori, author];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -243,16 +271,16 @@ app.post("/api/v1/article/create", upload.single("image"), (req, res) => {
 
 app.put("/api/v1/article/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
-  const { title, description, content, kategori } = req.body;
+  const { title, description, content, kategori, author } = req.body;
 
   // Jika ada file gambar yang diupload
   let image = req.file ? `/images/${req.file.filename}` : null;
 
   const sql =
-    "UPDATE article SET image = ?, title = ?, description = ?, content = ?, kategori = ? WHERE id = ?";
+    "UPDATE article SET image = ?, title = ?, description = ?, content = ?, kategori = ?, author = ? WHERE id = ?";
   db.query(
     sql,
-    [image, title, description, content, kategori, id],
+    [image, title, description, content, kategori, author, id],
     (err, result) => {
       if (err) {
         res.status(500).send({ message: "Error updating article", error: err });
@@ -638,19 +666,56 @@ app.delete("/api/v1/about/delete/:id", (req, res) => {
 
 // visitor
 // Route untuk mendapatkan data pengunjung berdasarkan bulan
-app.get("/api/v1/visitors", (req, res) => {
-  const sql = "SELECT * FROM visitors";
-  db.query(sql, (err, result) => {
+app.get("/api/v1/visitors/:year", (req, res) => {
+  const year = req.params.year;
+
+  // Query untuk mendapatkan data pengunjung berdasarkan tahun
+  db.query("SELECT * FROM visitors WHERE year = ?", [year], (err, result) => {
     if (err) {
-      response(500, null, "Failed to retrieve about data", res);
-    } else {
-      response(200, result, "Data From Table about", res);
+      return res.status(500).json({ error: "Error retrieving visitor data" });
     }
+
+    // Buat array default untuk 12 bulan dengan count 0
+    const defaultData = [
+      { month: "Januari", count: 0 },
+      { month: "Februari", count: 0 },
+      { month: "Maret", count: 0 },
+      { month: "April", count: 0 },
+      { month: "Mei", count: 0 },
+      { month: "Juni", count: 0 },
+      { month: "Juli", count: 0 },
+      { month: "Agustus", count: 0 },
+      { month: "September", count: 0 },
+      { month: "Oktober", count: 0 },
+      { month: "November", count: 0 },
+      { month: "Desember", count: 0 },
+    ];
+
+    // Jika tidak ada data untuk tahun tersebut, kembalikan default data (semua 0)
+    if (result.length === 0) {
+      return res.status(200).json({
+        message: `No data found for the selected year ${year}, showing default data`,
+        payload: { datas: defaultData },
+      });
+    }
+
+    // Map data dari result ke defaultData untuk memastikan semua bulan ada
+    const mappedData = defaultData.map((monthObj) => {
+      const foundMonth = result.find(
+        (visitor) => visitor.month === monthObj.month
+      );
+      return foundMonth ? { ...monthObj, count: foundMonth.count } : monthObj;
+    });
+
+    // Kembalikan data yang sudah di-map
+    res.status(200).json({
+      message: `Data pengunjung untuk tahun ${year}`,
+      payload: { datas: mappedData },
+    });
   });
 });
 
 app.post("/api/v1/visitors/increment", (req, res) => {
-  // Ambil nama bulan sekarang dalam format teks (misal: 'Oktober')
   const months = [
     "Januari",
     "Februari",
@@ -665,32 +730,157 @@ app.post("/api/v1/visitors/increment", (req, res) => {
     "November",
     "Desember",
   ];
-  const currentMonth = months[new Date().getMonth()]; // Ambil nama bulan dari array
 
-  // Query untuk memperbarui data pengunjung sesuai bulan saat ini
+  const currentMonthIndex = new Date().getMonth(); // 0-11
+  const currentYear = new Date().getFullYear(); // Ambil tahun saat ini
+  const currentMonth = months[currentMonthIndex]; // Ambil nama bulan dari array
+
+  // Pertama, periksa apakah sudah ada data untuk tahun saat ini dan bulan saat ini
   db.query(
-    "UPDATE visitors SET count = count + 1 WHERE month = ?",
-    [currentMonth],
+    "SELECT * FROM visitors WHERE year = ? AND month = ?",
+    [currentYear, currentMonth],
     (err, result) => {
       if (err) {
-        return res.status(500).json({ error: "Error menambah kunjungan" });
+        return res.status(500).json({ error: "Error checking visitor data" });
       }
 
-      // Setelah menambah kunjungan, ambil nilai terbaru untuk bulan tersebut
-      db.query(
-        "SELECT count FROM visitors WHERE month = ?",
-        [currentMonth],
-        (err, result) => {
-          if (err) {
-            return res
-              .status(500)
-              .json({ error: "Error mengambil data terbaru" });
+      // Jika tidak ada data, buat baris baru
+      if (result.length === 0) {
+        // Tambahkan entri baru untuk bulan saat ini
+        db.query(
+          "INSERT INTO visitors (month, year, count) VALUES (?, ?, ?)",
+          [currentMonth, currentYear, 1], // Mengatur count awal menjadi 1
+          (err, result) => {
+            if (err) {
+              return res
+                .status(500)
+                .json({ error: "Error adding visitor data" });
+            }
+            return res.status(201).json({
+              message: "Visitor count created",
+              month: currentMonth,
+              year: currentYear,
+            });
           }
-          res.json({ month: currentMonth, count: result[0].count });
-        }
-      );
+        );
+      } else {
+        // Jika data sudah ada, tingkatkan count
+        db.query(
+          "UPDATE visitors SET count = count + 1 WHERE year = ? AND month = ?",
+          [currentYear, currentMonth],
+          (err, result) => {
+            if (err) {
+              return res
+                .status(500)
+                .json({ error: "Error incrementing visitor count" });
+            }
+            return res.json({
+              month: currentMonth,
+              year: currentYear,
+              count: result.affectedRows,
+            });
+          }
+        );
+      }
     }
   );
+});
+
+app.get("/api/v1/images", (req, res) => {
+  const sql = "SELECT * FROM images";
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve images data", res);
+    } else {
+      response(200, result, "Data From Table images", res);
+    }
+  });
+});
+
+app.get("/api/v1/images/kategori", (req, res) => {
+  const kategori = req.query.kategori;
+  const sql = "SELECT * FROM images WHERE kategori = ?";
+
+  db.query(sql, [kategori], (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve images data", res);
+    } else {
+      response(200, result, "Data From Table images", res);
+    }
+  });
+});
+
+app.get("/api/v1/images/:id", (req, res) => {
+  const sql = "SELECT * FROM images WHERE id = ?";
+  const id = req.params.id;
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve images data", res);
+    } else if (result.length === 0) {
+      response(404, null, "images not found", res);
+    } else {
+      response(200, result, "Data From Table images", res);
+    }
+  });
+});
+
+app.post("/api/v1/images/create", upload.single("image"), (req, res) => {
+  const data = req.body;
+  const { kategori } = data;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  const sql = "INSERT INTO images (image, kategori) VALUES (?, ?)";
+  let params = [image, kategori];
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error("Failed to insert images record", err);
+      res.status(500).json({ message: "Failed to insert images record" });
+    } else {
+      console.log("images record inserted successfully");
+      res.status(201).json({ message: "images created successfully" });
+    }
+  });
+});
+
+app.put("/api/v1/images/update/:id", upload.single("image"), (req, res) => {
+  const id = req.params.id;
+  const { kategori } = req.body;
+
+  // Jika ada file gambar yang diupload
+  let image = req.file ? `/images/${req.file.filename}` : null;
+
+  const sql = "UPDATE images SET image = ?, kategori = ? WHERE id = ?";
+  db.query(sql, [image, kategori, id], (err, result) => {
+    if (err) {
+      res.status(500).send({ message: "Error updating images", error: err });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).send({ message: "No images found with this ID" });
+      return;
+    }
+    res.send({ message: `images with ID ${id} has been updated successfully` });
+  });
+});
+
+app.delete("/api/v1/images/delete/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = "DELETE FROM images WHERE id = ?";
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      res.status(500).send({ message: "Error deleting team", error: err });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).send({ message: "No team found with this ID" });
+      return;
+    }
+    res.send({ message: `team with ID ${id} has been deleted successfully` });
+  });
 });
 
 // Middleware untuk melayani file statis dari folder public

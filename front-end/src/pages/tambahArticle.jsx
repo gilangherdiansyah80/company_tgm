@@ -10,6 +10,7 @@ const TambahArticle = () => {
     description: "",
     content: "",
     kategori: "",
+    author: "",
   });
   const [articleAdded, setArticleAdded] = useState(false);
   const [imageFile, setImageFile] = useState(null);
@@ -41,6 +42,7 @@ const TambahArticle = () => {
     formData.append("description", dataForm.description);
     formData.append("content", dataForm.content);
     formData.append("kategori", dataForm.kategori);
+    formData.append("author", dataForm.author);
     if (imageFile) {
       formData.append("image", imageFile); // Tambahkan gambar ke formData
     }
@@ -169,6 +171,22 @@ const TambahArticle = () => {
               placeholder="Input your kategori"
               className="p-3 rounded-lg border-black border-2"
               value={dataForm.kategori}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-y-2 md:text-xl">
+            <label htmlFor="author" className="text-black font-bold">
+              Author
+            </label>
+            <input
+              type="text"
+              name="author"
+              id="author"
+              placeholder="Input your author"
+              className="p-3 rounded-lg border-black border-2"
+              value={dataForm.author}
               onChange={handleChange}
               required
             />

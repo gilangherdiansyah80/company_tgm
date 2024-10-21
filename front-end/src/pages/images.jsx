@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthLayout from "../component/layouts/AuthLayout";
-import parse from "html-react-parser";
 
-const Article = () => {
-  const [dataArticle, setDataArticle] = useState([]);
+const Images = () => {
+  const [dataImages, setDataImages] = useState([]);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
 
-  const getArticle = async () => {
-    const response = await fetch("http://localhost:3000/api/v1/article");
+  const getImages = async () => {
+    const response = await fetch("http://localhost:3000/api/v1/Images");
     const data = await response.json();
-    setDataArticle(data.payload.datas);
+    setDataImages(data.payload.datas);
   };
 
   const handleDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/v1/article/delete/${id}`,
+        `http://localhost:3000/api/v1/Images/delete/${id}`,
         {
           method: "DELETE",
         }
@@ -29,7 +28,7 @@ const Article = () => {
       }
 
       // Refresh data setelah delete
-      getArticle();
+      getImages();
 
       // Reset ID dan tutup popup setelah penghapusan
       setDeleteId(null);
@@ -63,7 +62,7 @@ const Article = () => {
   }, 3000);
 
   useEffect(() => {
-    getArticle();
+    getImages();
   }, []);
 
   return (
@@ -72,54 +71,38 @@ const Article = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <Link to="/tambahArticle">
+        <Link to="/tambahImages">
           <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
         </Link>
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Article</h1>
+        <h1 className="text-xl font-bold md:text-2xl">Images</h1>
 
         <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
-          {dataArticle.map((item) => (
+          {dataImages.map((item) => (
             <div
               key={item.id}
               className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl h-fit"
             >
               <img
                 src={`http://localhost:3000${item.image}`}
-                alt={item.title}
-                className="w-full h-96 bg-center object-cover rounded-xl"
+                alt={item.product_name}
+                className="w-full h-96 object-cover rounded-xl"
               />
-              <article className="flex justify-between">
-                <p>{item.title}</p>
-                <p>Author : {item.author}</p>
-              </article>
-              <article>
-                <p>Deskripsi :</p>
-                <p>{item.description}</p>
-              </article>
-              <article>
-                <p>Isi Artikel :</p>
-                <div>{parse(item.content)}</div>
-              </article>
-
-              <div className="flex justify-between">
-                <p>Create : {item.create_at.slice(0, 10)}</p>
-                <p>Kategori : {item.kategori}</p>
-              </div>
+              <p>Kategori : {item.kategori}</p>
               <div className="flex w-full gap-x-3">
                 <Link
-                  to={`/editarticle/${item.id}`}
+                  to={`/editimages/${item.id}`}
                   className="w-1/2 bg-white p-3 text-black rounded-lg text-center"
                 >
-                  <button>Edit Article</button>
+                  <button>Edit Images</button>
                 </Link>
                 <button
                   className="bg-red-700 rounded-lg p-3 text-white w-1/2"
                   onClick={() => confirmDelete(item.id)}
                 >
-                  Hapus Article
+                  Hapus Images
                 </button>
               </div>
             </div>
@@ -129,11 +112,11 @@ const Article = () => {
 
       {isDeletePopupOpen && (
         <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-          <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+          <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
             <h2 className="text-2xl font-semibold">
-              Apakah anda yakin ingin menghapus Article ini?
+              Apakah anda yakin ingin menghapus Images ini?
             </h2>
-            <div className="flex justify-center gap-5">
+            <div className="flex justify-center gap-5 md:text-xl">
               <button
                 onClick={proceedDelete}
                 className="text-white px-4 py-2 rounded-lg bg-red-700"
@@ -153,8 +136,8 @@ const Article = () => {
 
       {afterDelete && (
         <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-5">
-          <div className="bg-white w-full md:w-1/2 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
-            <h2 className="text-2xl font-semibold">Article has been deleted</h2>
+          <div className="bg-white w-full md:w-4/5 lg:w-1/3 p-5 rounded-lg shadow-lg text-center flex flex-col gap-y-5">
+            <h2 className="text-2xl font-semibold">Images has been deleted</h2>
             <i className="fas fa-check-circle text-5xl text-green-500"></i>
           </div>
         </section>
@@ -163,4 +146,4 @@ const Article = () => {
   );
 };
 
-export default Article;
+export default Images;
