@@ -66,7 +66,7 @@ const Images = () => {
   }, []);
 
   return (
-    <AuthLayout>
+    <AuthLayout title={"Images"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -77,37 +77,60 @@ const Images = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Images</h1>
-
-        <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
-          {dataImages.map((item) => (
-            <div
-              key={item.id}
-              className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 md:text-xl h-fit"
-            >
-              <img
-                src={`http://localhost:3000${item.image}`}
-                alt={item.product_name}
-                className="w-full h-96 object-cover rounded-xl"
-              />
-              <p>Kategori : {item.kategori}</p>
-              <div className="flex w-full gap-x-3">
-                <Link
-                  to={`/editimages/${item.id}`}
-                  className="w-1/2 bg-white p-3 text-black rounded-lg text-center"
-                >
-                  <button>Edit Images</button>
-                </Link>
-                <button
-                  className="bg-red-700 rounded-lg p-3 text-white w-1/2"
-                  onClick={() => confirmDelete(item.id)}
-                >
-                  Hapus Images
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <table className="w-full table-auto border-collapse border border-black">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border border-black px-4 py-2 text-center">Id</th>
+              <th className="border border-black px-4 py-2 text-center">
+                Images
+              </th>
+              <th className="border border-black px-4 py-2 text-center">
+                Kategori
+              </th>
+              <th className="border border-black px-4 py-2 text-center">
+                Aksi
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataImages.map((item) => (
+              <tr
+                key={item.id}
+                className="bg-white hover:bg-gray-100 text-center"
+              >
+                <td className="border border-black px-4 py-2 text-black">
+                  {item.id}
+                </td>
+                <td className="border border-black px-4 py-2">
+                  <img
+                    src={`http://localhost:3000${item.image}`}
+                    alt={item.product_name}
+                    className="w-32 h-20 lg:w-full object-cover rounded-xl"
+                  />
+                </td>
+                <td className="border border-black px-4 py-2 text-black">
+                  {item.kategori}
+                </td>
+                <td className="border border-black px-4 py-2">
+                  <div className="flex w-full gap-x-3">
+                    <Link
+                      to={`/editimages/${item.id}`}
+                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                    >
+                      Edit Images
+                    </Link>
+                    <button
+                      className="bg-red-700 rounded-lg p-3 text-white w-1/2"
+                      onClick={() => confirmDelete(item.id)}
+                    >
+                      Hapus Images
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
 
       {isDeletePopupOpen && (
@@ -125,7 +148,7 @@ const Images = () => {
               </button>
               <button
                 onClick={cancelDelete}
-                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+                className="bg-black text-black px-4 py-2 rounded-lg hover:bg-gray-400"
               >
                 Cancel
               </button>

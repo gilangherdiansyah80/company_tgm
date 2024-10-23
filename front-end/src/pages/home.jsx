@@ -131,7 +131,7 @@ const Home = () => {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout title={"Dashboard"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -141,9 +141,10 @@ const Home = () => {
           id="years"
           value={selectedYear}
           onChange={handleYearChange} // Update tahun ketika dropdown berubah
+          className="bg-gradient-to-l from-[#67BD5E] to-[#467840] p-2 text-white rounded-lg"
         >
           {availableYears.map((year) => (
-            <option key={year} value={year}>
+            <option key={year} value={year} className="text-black">
               {year}
             </option>
           ))}
@@ -151,8 +152,6 @@ const Home = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Home</h1>
-
         {/* Render Chart.js Bar chart */}
         <Bar data={data} options={options} />
 

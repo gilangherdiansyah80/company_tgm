@@ -66,7 +66,7 @@ const Testimoni = () => {
   }, []);
 
   return (
-    <AuthLayout>
+    <AuthLayout title="Testimoni">
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -77,9 +77,7 @@ const Testimoni = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Testimoni</h1>
-
-        <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
+        <div className="w-full flex flex-col gap-y-5 xl:grid xl:grid-cols-3 xl:gap-5">
           {dataTestimoni.map((item) => (
             <div
               key={item.id}

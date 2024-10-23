@@ -73,7 +73,7 @@ const Users = () => {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout title={"Users"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -84,44 +84,65 @@ const Users = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Users</h1>
-
-        <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5s xl:grid-cols-3 xl:gap-5">
-          {dataUsers.map((user, index) => {
-            const isCurrent = isCurrentUser(user.username); // Cek apakah user adalah user yang login
-            return (
-              <div
-                key={user.id}
-                className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3"
-              >
-                <h2 className="text-center text-2xl font-bold">
-                  User #{index + 1}
-                </h2>
-                <p className="md:text-xl">Username : {user.username}</p>
-                <div className="flex w-full gap-x-3">
-                  <Link
-                    to={`/edituser/${user.username}`}
-                    className={`w-1/2 p-3 text-black rounded-lg text-center md:text-xl bg-white ${
-                      isCurrent ? "" : "opacity-50 cursor-not-allowed"
-                    }`} // Nonaktifkan jika bukan akun yang login
-                    onClick={(e) => !isCurrent && e.preventDefault()} // Cegah tindakan jika bukan akun yang login
-                  >
-                    <button disabled={!isCurrent}>Edit User</button>
-                  </Link>
-                  <button
-                    className={`bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl ${
-                      isCurrent ? "" : "opacity-50 cursor-not-allowed"
-                    }`} // Nonaktifkan tombol hapus jika bukan akun yang login
-                    onClick={() => isCurrent && confirmDelete(user.id)} // Cegah tindakan jika bukan akun yang login
-                    disabled={!isCurrent}
-                  >
-                    Hapus User
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <table className="w-full table-auto border-collapse border border-black">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border border-black px-4 py-2 text-center">Id</th>
+              <th className="border border-black px-4 py-2 text-center">
+                Images
+              </th>
+              <th className="border border-black px-4 py-2 text-center">
+                Kategori
+              </th>
+              <th className="border border-black px-4 py-2 text-center">
+                Aksi
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataUsers.map((item) => {
+              const isCurrent = isCurrentUser(item.username); // Cek apakah user adalah user yang login
+              return (
+                <tr
+                  key={item.id}
+                  className="bg-white hover:bg-gray-100 text-center"
+                >
+                  <td className="border border-black px-4 py-2 text-black">
+                    {item.id}
+                  </td>
+                  <td className="border border-black px-4 py-2">
+                    {item.username}
+                  </td>
+                  <td className="border border-black px-4 py-2 text-black">
+                    {item.password}
+                  </td>
+                  <td className="border border-black px-4 py-2">
+                    <div className="flex w-full gap-x-3">
+                      <Link
+                        to={`/edituser/${item.username}`}
+                        className={`w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black ${
+                          isCurrent ? "" : "opacity-50 cursor-not-allowed"
+                        }`} // Nonaktifkan jika bukan akun yang login
+                        onClick={(e) => !isCurrent && e.preventDefault()} // Cegah tindakan jika bukan akun yang login
+                      >
+                        <button disabled={!isCurrent}>Edit User</button>
+                      </Link>
+                      <button
+                        className={`bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl ${
+                          isCurrent ? "" : "opacity-50 cursor-not-allowed"
+                        }`} // Nonaktifkan tombol hapus jika bukan akun yang login
+                        onClick={() => isCurrent && confirmDelete(item.id)} // Cegah tindakan jika bukan akun yang login
+                        disabled={!isCurrent}
+                      >
+                        Hapus User
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </section>
 
       {isDeletePopupOpen && (

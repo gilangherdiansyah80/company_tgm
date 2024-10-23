@@ -77,7 +77,7 @@ const Product = () => {
   }, [afterDelete]);
 
   return (
-    <AuthLayout>
+    <AuthLayout title={"Product"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -88,10 +88,8 @@ const Product = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Product</h1>
-
-        <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
-          {dataProduct.map((item, index) => (
+        <div className="w-full flex flex-col gap-y-5 xl:grid xl:grid-cols-3 xl:gap-5">
+          {dataProduct.map((item) => (
             <div
               key={item.id}
               className="bg-gradient-to-l from-[#67BD5E] to-[#467840] rounded-xl p-3 flex flex-col text-white gap-y-3 h-fit"
@@ -101,9 +99,6 @@ const Product = () => {
                 alt={item.product_name}
                 className="w-full h-1/3 object-cover rounded-xl"
               />
-              <h2 className="text-center text-2xl font-bold">
-                Product #{index + 1}
-              </h2>
               <p className="md:text-xl">{item.product_name}</p>
               <p className="md:text-xl">{item.description}</p>
               <div className="flex justify-between">

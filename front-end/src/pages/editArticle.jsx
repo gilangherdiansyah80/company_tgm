@@ -33,6 +33,7 @@ const EditArticle = () => {
           description: articleData.description || "",
           content: articleData.content || "",
           kategori: articleData.kategori || "",
+          author: articleData.author || "",
         });
       } catch (error) {
         console.error(error);

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthLayout from "../component/layouts/AuthLayout";
-import parse from "html-react-parser";
 
 const Article = () => {
   const [dataArticle, setDataArticle] = useState([]);
@@ -66,8 +65,15 @@ const Article = () => {
     getArticle();
   }, []);
 
+  const stripHTML = (html, length) => {
+    const tempP = document.createElement("p");
+    tempP.innerHTML = html;
+    const text = tempP.textContent || tempP.innerText || "";
+    return text.length > length ? text.slice(0, length) + "..." : text;
+  };
+
   return (
-    <AuthLayout>
+    <AuthLayout title={"Article"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
@@ -78,9 +84,7 @@ const Article = () => {
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
-        <h1 className="text-xl font-bold md:text-2xl">Article</h1>
-
-        <div className="w-full flex flex-col gap-y-5 md:grid md:grid-cols-2 md:gap-x-5 xl:grid-cols-3 xl:gap-5">
+        <div className="w-full flex flex-col gap-y-5 xl:grid xl:grid-cols-3 xl:gap-5">
           {dataArticle.map((item) => (
             <div
               key={item.id}
@@ -101,7 +105,7 @@ const Article = () => {
               </article>
               <article>
                 <p>Isi Artikel :</p>
-                <div>{parse(item.content)}</div>
+                <div>{stripHTML(item.content, 156)}</div>
               </article>
 
               <div className="flex justify-between">
