@@ -83,16 +83,16 @@ const Users = () => {
         </Link>
       </header>
 
-      <section className="flex flex-col gap-y-5 items-center">
-        <table className="w-full table-auto border-collapse border border-black">
+      <section className="overflow-x-auto lg:overflow-hidden lg:w-full">
+        <table className="lg:w-full border-collapse border border-black">
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-black px-4 py-2 text-center">Id</th>
               <th className="border border-black px-4 py-2 text-center">
-                Images
+                Username
               </th>
               <th className="border border-black px-4 py-2 text-center">
-                Kategori
+                Password
               </th>
               <th className="border border-black px-4 py-2 text-center">
                 Aksi

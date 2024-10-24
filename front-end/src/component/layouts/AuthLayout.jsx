@@ -43,7 +43,7 @@ const Home = ({ title, children }) => {
             <img
               src="/images/logo.png"
               alt="Company TGM"
-              className={`${isOpen ? "w-10 h-10" : "w-12 h-12"}`}
+              className={`${isOpen ? "w-11 h-11" : "w-12 h-12"}`}
             />
           </div>
           <h1

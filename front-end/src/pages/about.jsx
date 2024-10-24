@@ -76,8 +76,8 @@ const About = () => {
         </Link>
       </header>
 
-      <section className="flex flex-col gap-y-5 items-center">
-        <table className="w-full table-auto border-collapse border border-black">
+      <section className="overflow-x-auto md:overflow-hidden md:w-full">
+        <table className="md:w-full border-collapse border border-black">
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-black px-4 py-2 text-center">Id</th>
@@ -109,13 +109,13 @@ const About = () => {
                       to={`/editabout/${item.id}`}
                       className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
                     >
-                      Edit Images
+                      Edit About
                     </Link>
                     <button
                       className="bg-red-700 rounded-lg p-3 text-white w-1/2"
                       onClick={() => confirmDelete(item.id)}
                     >
-                      Hapus Images
+                      Hapus About
                     </button>
                   </div>
                 </td>
