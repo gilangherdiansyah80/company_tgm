@@ -8,8 +8,10 @@ const EditTestimoni = () => {
     username: "",
     description: "",
     jabatan: "",
+    image: "",
   });
   const [imageFile, setImageFile] = useState(null);
+  const [showImageInput, setShowImageInput] = useState(false); // State untuk kontrol tombol gambar
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -26,6 +28,7 @@ const EditTestimoni = () => {
         username: testimoniData.username || "",
         description: testimoniData.description || "",
         jabatan: testimoniData.jabatan || "",
+        image: testimoniData.image || "",
       });
     };
 
@@ -33,7 +36,14 @@ const EditTestimoni = () => {
   }, [id, endPoint]);
 
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      setupdateTestimoni({
+        ...updateTestimoni,
+        image: URL.createObjectURL(file), // Tampilkan preview gambar yang dipilih
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -45,6 +55,8 @@ const EditTestimoni = () => {
     formData.append("jabatan", updateTestimoni.jabatan);
     if (imageFile) {
       formData.append("image", imageFile); // Tambahkan gambar ke formData
+    } else {
+      formData.append("image", updateTestimoni.image);
     }
 
     const response = await fetch(endPointPut, {
@@ -65,6 +77,10 @@ const EditTestimoni = () => {
       ...updateTestimoni,
       [e.target.id]: e.target.value,
     });
+  };
+
+  const toggleEditImage = () => {
+    setShowImageInput(!showImageInput);
   };
 
   return (
@@ -90,18 +106,36 @@ const EditTestimoni = () => {
                   required
                 />
               </div>
+
+              {/* Gambar dan Tombol untuk Input Gambar */}
               <div className="flex flex-col gap-y-2 md:text-xl">
-                <label htmlFor="image" className="text-black font-bold">
-                  Ubah Gambar
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  className="p-3 rounded-lg border-black border-2"
-                  onChange={handleImageChange}
-                />
+                <label className="text-black font-bold">Gambar</label>
+                {updateTestimoni.image && (
+                  <img
+                    src={`http://localhost:3000${updateTestimoni.image}`}
+                    alt="Current product"
+                    className="w-32 h-32 object-cover mb-3"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={toggleEditImage}
+                  className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-white px-4 py-2 rounded-lg mb-3"
+                >
+                  {showImageInput ? "Batal Ubah Gambar" : "Ubah Gambar"}
+                </button>
+                {showImageInput && (
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/*"
+                    className="p-3 rounded-lg border-black border-2"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
+
               <div className="flex flex-col gap-y-2 md:text-xl">
                 <label htmlFor="description" className="text-black font-bold">
                   Description

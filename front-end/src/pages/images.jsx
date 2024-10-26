@@ -148,7 +148,7 @@ const Images = () => {
               </button>
               <button
                 onClick={cancelDelete}
-                className="bg-black text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-400"
               >
                 Cancel
               </button>

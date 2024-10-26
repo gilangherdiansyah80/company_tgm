@@ -102,6 +102,7 @@ const TambahTeam = () => {
               type="file"
               name="image"
               id="image"
+              accept="image/*"
               className="p-3 rounded-lg border-black border-2"
               onChange={handleImageChange}
             />

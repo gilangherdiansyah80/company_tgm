@@ -97,14 +97,17 @@ const Product = () => {
               <img
                 src={`http://localhost:3000${item.image}`}
                 alt={item.product_name}
-                className="w-full h-1/3 object-cover rounded-xl"
+                className="w-full h-96 object-cover rounded-xl"
               />
-              <p className="md:text-xl">{item.product_name}</p>
-              <p className="md:text-xl">{item.description}</p>
-              <div className="flex justify-between">
-                <p className="md:text-xl">Stok: {item.stock}</p>
-                <p className="md:text-xl">Kategori: {item.kategori}</p>
-              </div>
+              <section className="flex justify-between">
+                <div className="flex flex-col gap-y-3">
+                  <p className="md:text-xl">{item.product_name}</p>
+                  <p className="md:text-xl">{item.description}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="md:text-xl">Kategori: {item.kategori}</p>
+                </div>
+              </section>
               <div className="flex w-full gap-x-3">
                 <Link
                   to={`/editproduct/${item.id}`}

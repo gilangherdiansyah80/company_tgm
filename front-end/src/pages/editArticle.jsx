@@ -12,10 +12,12 @@ const EditArticle = () => {
     content: "",
     kategori: "",
     author: "",
+    image: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [editImage, setEditImage] = useState(false);
 
   const endPoint = `http://localhost:3000/api/v1/article/${id}`;
   const endPointPut = `http://localhost:3000/api/v1/article/update/${id}`;
@@ -34,6 +36,7 @@ const EditArticle = () => {
           content: articleData.content || "",
           kategori: articleData.kategori || "",
           author: articleData.author || "",
+          image: articleData.image || "",
         });
       } catch (error) {
         console.error(error);
@@ -47,6 +50,12 @@ const EditArticle = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
+    if (file) {
+      setupdateArticle({
+        ...updateArticle,
+        image: URL.createObjectURL(file), // Tampilkan preview gambar yang dipilih
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -60,6 +69,8 @@ const EditArticle = () => {
     formData.append("author", updateArticle.author);
     if (imageFile) {
       formData.append("image", imageFile);
+    } else {
+      formData.append("image", updateArticle.image);
     }
 
     try {
@@ -91,6 +102,10 @@ const EditArticle = () => {
     });
   };
 
+  const handleEditImage = () => {
+    setEditImage(!editImage);
+  };
+
   return (
     <AuthLayout>
       <section className="flex flex-col gap-y-5 items-center w-full">
@@ -118,14 +133,30 @@ const EditArticle = () => {
                 <label htmlFor="image" className="text-black font-bold">
                   Ganti Gambar
                 </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  placeholder="Input your title"
-                  className="p-3 rounded-lg border-black border-2"
-                  onChange={handleImageChange}
-                />
+                {updateArticle.image && (
+                  <img
+                    src={`http://localhost:3000${updateArticle.image}`}
+                    alt="Current product"
+                    className="w-32 h-32 object-cover mb-3"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={handleEditImage}
+                  className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-white px-4 py-2 rounded-lg mb-3"
+                >
+                  {editImage ? "Batal Ubah Gambar" : "Ubah Gambar"}
+                </button>
+                {editImage && (
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/*"
+                    className="p-3 rounded-lg border-black border-2"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
               <div className="flex flex-col gap-y-2 md:text-xl">
                 <label htmlFor="description" className="text-black font-bold">

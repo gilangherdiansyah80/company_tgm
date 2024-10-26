@@ -11,10 +11,12 @@ const EditTeam = () => {
     no_telp: "",
     linkedin: "",
     instagram: "",
+    image: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [editImage, setEditImage] = useState(false);
 
   const endPoint = `http://localhost:3000/api/v1/team/${id}`;
   const endPointPut = `http://localhost:3000/api/v1/team/update/${id}`;
@@ -32,6 +34,7 @@ const EditTeam = () => {
         no_telp: teamData.no_telp || "",
         linkedin: teamData.linkedin || "",
         instagram: teamData.instagram || "",
+        image: teamData.image || "",
       });
     };
 
@@ -41,6 +44,12 @@ const EditTeam = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
+    if (file) {
+      setupdateTeam({
+        ...updateTeam,
+        image: URL.createObjectURL(file), // Tampilkan preview gambar yang dipilih
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -56,6 +65,8 @@ const EditTeam = () => {
 
     if (imageFile) {
       formData.append("image", imageFile);
+    } else {
+      formData.append("image", updateTeam.image);
     }
 
     const response = await fetch(endPointPut, {
@@ -76,6 +87,10 @@ const EditTeam = () => {
       ...updateTeam,
       [e.target.id]: e.target.value,
     });
+  };
+
+  const handleEditImage = () => {
+    setEditImage(!editImage);
   };
 
   return (
@@ -105,13 +120,30 @@ const EditTeam = () => {
                 <label htmlFor="image" className="text-black font-bold">
                   Nama
                 </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  className="p-3 rounded-lg border-black border-2"
-                  onChange={handleImageChange}
-                />
+                {updateTeam.image && (
+                  <img
+                    src={`http://localhost:3000${updateTeam.image}`}
+                    alt="Current product"
+                    className="w-32 h-32 object-cover mb-3"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={handleEditImage}
+                  className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-white px-4 py-2 rounded-lg mb-3"
+                >
+                  {editImage ? "Batal Ubah Gambar" : "Ubah Gambar"}
+                </button>
+                {editImage && (
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/*"
+                    className="p-3 rounded-lg border-black border-2"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
               <div className="flex flex-col gap-y-2">
                 <label htmlFor="jabatan" className="text-black font-bold">

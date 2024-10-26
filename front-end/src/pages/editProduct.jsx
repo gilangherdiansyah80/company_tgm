@@ -7,10 +7,11 @@ const EditProduct = () => {
   const [updateProduct, setupdateProduct] = useState({
     product_name: "",
     description: "",
-    stock: "",
     kategori: "",
+    image: "",
   });
   const [imageFile, setImageFile] = useState(null);
+  const [isEditingImage, setIsEditingImage] = useState(false); // State untuk mengontrol input file
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -21,13 +22,13 @@ const EditProduct = () => {
     const getFetchData = async () => {
       const response = await fetch(endPoint);
       const data = await response.json();
-      const productData = data.payload.datas[0]; // Ambil data pertama jika banyak
+      const productData = data.payload.datas[0];
       setdataProduct(productData);
       setupdateProduct({
         product_name: productData.product_name || "",
         description: productData.description || "",
-        stock: productData.stock || "",
         kategori: productData.kategori || "",
+        image: productData.image || "",
       });
     };
 
@@ -35,7 +36,14 @@ const EditProduct = () => {
   }, [id, endPoint]);
 
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      setupdateProduct({
+        ...updateProduct,
+        image: URL.createObjectURL(file), // Tampilkan preview gambar yang dipilih
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -44,10 +52,11 @@ const EditProduct = () => {
     const formData = new FormData();
     formData.append("product_name", updateProduct.product_name);
     formData.append("description", updateProduct.description);
-    formData.append("stock", updateProduct.stock);
     formData.append("kategori", updateProduct.kategori);
     if (imageFile) {
-      formData.append("image", imageFile);
+      formData.append("image", imageFile); // Gunakan file baru jika dipilih
+    } else {
+      formData.append("image", updateProduct.image); // Gunakan gambar yang ada di database jika tidak ada file baru
     }
 
     const response = await fetch(endPointPut, {
@@ -57,7 +66,7 @@ const EditProduct = () => {
 
     if (response.ok) {
       alert("Data updated successfully!");
-      navigate("/product"); // Redirect ke halaman booking list setelah update berhasil
+      navigate("/product");
     } else {
       alert("Failed to update data");
     }
@@ -68,6 +77,10 @@ const EditProduct = () => {
       ...updateProduct,
       [e.target.id]: e.target.value,
     });
+  };
+
+  const toggleEditImage = () => {
+    setIsEditingImage(!isEditingImage); // Ubah status pengeditan gambar
   };
 
   return (
@@ -95,15 +108,32 @@ const EditProduct = () => {
               </div>
               <div className="flex flex-col gap-y-2 md:text-xl">
                 <label htmlFor="image" className="text-black font-bold">
-                  Ubah Gambar
+                  Gambar Produk
                 </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  className="p-3 rounded-lg border-black border-2"
-                  onChange={handleImageChange}
-                />
+                {updateProduct.image && (
+                  <img
+                    src={`http://localhost:3000${updateProduct.image}`}
+                    alt="Current product"
+                    className="w-32 h-32 object-cover mb-3"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={toggleEditImage}
+                  className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-white px-4 py-2 rounded-lg mb-3"
+                >
+                  {isEditingImage ? "Batal Ubah Gambar" : "Ubah Gambar"}
+                </button>
+                {isEditingImage && (
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/*"
+                    className="p-3 rounded-lg border-black border-2"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
               <div className="flex flex-col gap-y-2 md:text-xl">
                 <label htmlFor="description" className="text-black font-bold">
@@ -120,23 +150,8 @@ const EditProduct = () => {
                 />
               </div>
               <div className="flex flex-col gap-y-2 md:text-xl">
-                <label htmlFor="stock" className="text-black font-bold">
-                  Stok
-                </label>
-                <input
-                  type="number"
-                  name="stock"
-                  id="stock"
-                  placeholder="Input your stock"
-                  className="p-3 rounded-lg border-black border-2"
-                  value={updateProduct.stock}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-y-2 md:text-xl">
                 <label htmlFor="kategori" className="text-black font-bold">
-                  kategori
+                  Kategori
                 </label>
                 <input
                   type="text"

@@ -273,28 +273,34 @@ app.put("/api/v1/article/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { title, description, content, kategori, author } = req.body;
 
-  // Jika ada file gambar yang diupload
-  let image = req.file ? `/images/${req.file.filename}` : null;
+  let sql, params;
 
-  const sql =
-    "UPDATE article SET image = ?, title = ?, description = ?, content = ?, kategori = ?, author = ? WHERE id = ?";
-  db.query(
-    sql,
-    [image, title, description, content, kategori, author, id],
-    (err, result) => {
-      if (err) {
-        res.status(500).send({ message: "Error updating article", error: err });
-        return;
-      }
-      if (result.affectedRows === 0) {
-        res.status(404).send({ message: "No article found with this ID" });
-        return;
-      }
-      res.send({
-        message: `article with ID ${id} has been updated successfully`,
-      });
+  if (req.file) {
+    // Jika ada file gambar yang diupload
+    const image = `/images/${req.file.filename}`;
+    sql =
+      "UPDATE article SET image = ?, title = ?, description = ?, content = ?, kategori = ?, author = ? WHERE id = ?";
+    params = [image, title, description, content, kategori, author, id];
+  } else {
+    // Jika tidak ada file yang diupload, tetap gunakan gambar lama
+    sql =
+      "UPDATE article SET title = ?, description = ?, content = ?, kategori = ?, author = ? WHERE id = ?";
+    params = [title, description, content, kategori, author, id];
+  }
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      res.status(500).send({ message: "Error updating article", error: err });
+      return;
     }
-  );
+    if (result.affectedRows === 0) {
+      res.status(404).send({ message: "No article found with this ID" });
+      return;
+    }
+    res.send({
+      message: `Article with ID ${id} has been updated successfully`,
+    });
+  });
 });
 
 app.delete("/api/v1/article/delete/:id", (req, res) => {
@@ -345,13 +351,13 @@ app.get("/api/v1/product/:id", (req, res) => {
 // Rute untuk membuat produk baru
 app.post("/api/v1/product/create", upload.single("image"), (req, res) => {
   const data = req.body;
-  const { product_name, description, stock, kategori } = data;
+  const { product_name, description, kategori } = data;
 
   // Jika ada file gambar yang diupload
   let image = req.file ? `/images/${req.file.filename}` : null;
 
-  let sql = `INSERT INTO product (image, product_name, description, stock, kategori) VALUES (?, ?, ?, ?, ?)`;
-  let params = [image, product_name, description, stock, kategori];
+  let sql = `INSERT INTO product (image, product_name, description, kategori) VALUES (?, ?, ?, ?)`;
+  let params = [image, product_name, description, kategori];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -366,30 +372,52 @@ app.post("/api/v1/product/create", upload.single("image"), (req, res) => {
 
 app.put("/api/v1/product/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
-  const { product_name, description, stock, kategori } = req.body;
+  const { product_name, description, kategori } = req.body;
 
-  // Jika ada file gambar yang diupload
+  // Cek apakah ada file gambar yang diunggah
   let image = req.file ? `/images/${req.file.filename}` : null;
 
-  const sql =
-    "UPDATE product SET image = ?, product_name = ?, description = ?, stock = ?, kategori = ? WHERE id = ?";
-  db.query(
-    sql,
-    [image, product_name, description, stock, kategori, id],
-    (err, result) => {
-      if (err) {
-        res.status(500).send({ message: "Error updating product", error: err });
-        return;
-      }
-      if (result.affectedRows === 0) {
-        res.status(404).send({ message: "No product found with this ID" });
-        return;
-      }
-      res.send({
-        message: `product with ID ${id} has been updated successfully`,
-      });
+  // Ambil data produk untuk mendapatkan gambar yang sudah ada jika tidak ada gambar baru yang diunggah
+  const getProductQuery = "SELECT image FROM product WHERE id = ?";
+  db.query(getProductQuery, [id], (err, result) => {
+    if (err) {
+      res.status(500).send({ message: "Error retrieving product", error: err });
+      return;
     }
-  );
+
+    if (result.length === 0) {
+      res.status(404).send({ message: "No product found with this ID" });
+      return;
+    }
+
+    // Jika tidak ada gambar baru yang diunggah, gunakan gambar yang sudah ada di DB
+    if (!image) {
+      image = result[0].image;
+    }
+
+    // Lakukan update produk
+    const updateQuery =
+      "UPDATE product SET image = ?, product_name = ?, description = ?, kategori = ? WHERE id = ?";
+    db.query(
+      updateQuery,
+      [image, product_name, description, kategori, id],
+      (err, updateResult) => {
+        if (err) {
+          res
+            .status(500)
+            .send({ message: "Error updating product", error: err });
+          return;
+        }
+        if (updateResult.affectedRows === 0) {
+          res.status(404).send({ message: "No product found with this ID" });
+          return;
+        }
+        res.send({
+          message: `Product with ID ${id} has been updated successfully`,
+        });
+      }
+    );
+  });
 });
 
 app.delete("/api/v1/product/delete/:id", (req, res) => {
@@ -461,12 +489,22 @@ app.put("/api/v1/testimoni/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { username, description, jabatan } = req.body;
 
-  // Jika ada file gambar yang diupload
-  let image = req.file ? `/images/${req.file.filename}` : null;
+  let sql, params;
 
-  const sql =
-    "UPDATE testimoni SET username = ?, description = ?, image = ?, jabatan = ? WHERE id = ?";
-  db.query(sql, [username, description, image, jabatan, id], (err, result) => {
+  if (req.file) {
+    // Jika ada file gambar yang diupload
+    const image = `/images/${req.file.filename}`;
+    sql =
+      "UPDATE testimoni SET username = ?, description = ?, image = ?, jabatan = ? WHERE id = ?";
+    params = [username, description, image, jabatan, id];
+  } else {
+    // Jika tidak ada file yang diupload, gunakan gambar lama
+    sql =
+      "UPDATE testimoni SET username = ?, description = ?, jabatan = ? WHERE id = ?";
+    params = [username, description, jabatan, id];
+  }
+
+  db.query(sql, params, (err, result) => {
     if (err) {
       res.status(500).send({ message: "Error updating testimoni", error: err });
       return;
@@ -476,7 +514,7 @@ app.put("/api/v1/testimoni/update/:id", upload.single("image"), (req, res) => {
       return;
     }
     res.send({
-      message: `testimoni with ID ${id} has been updated successfully`,
+      message: `Testimoni with ID ${id} has been updated successfully`,
     });
   });
 });
@@ -550,26 +588,32 @@ app.put("/api/v1/team/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { name, email, no_telp, linkedin, instagram, jabatan } = req.body;
 
-  // Jika ada file gambar yang diupload
-  let image = req.file ? `/images/${req.file.filename}` : null;
+  let sql, params;
 
-  const sql =
-    "UPDATE team SET image = ?, name = ?, email = ?, no_telp = ?, linkedin = ?, instagram = ?, jabatan = ? WHERE id = ?";
-  db.query(
-    sql,
-    [image, name, email, no_telp, linkedin, instagram, jabatan, id],
-    (err, result) => {
-      if (err) {
-        res.status(500).send({ message: "Error updating team", error: err });
-        return;
-      }
-      if (result.affectedRows === 0) {
-        res.status(404).send({ message: "No team found with this ID" });
-        return;
-      }
-      res.send({ message: `team with ID ${id} has been updated successfully` });
+  if (req.file) {
+    // Jika ada file gambar yang diupload, update kolom image
+    const image = `/images/${req.file.filename}`;
+    sql =
+      "UPDATE team SET image = ?, name = ?, email = ?, no_telp = ?, linkedin = ?, instagram = ?, jabatan = ? WHERE id = ?";
+    params = [image, name, email, no_telp, linkedin, instagram, jabatan, id];
+  } else {
+    // Jika tidak ada file yang diupload, jangan update kolom image
+    sql =
+      "UPDATE team SET name = ?, email = ?, no_telp = ?, linkedin = ?, instagram = ?, jabatan = ? WHERE id = ?";
+    params = [name, email, no_telp, linkedin, instagram, jabatan, id];
+  }
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      res.status(500).send({ message: "Error updating team", error: err });
+      return;
     }
-  );
+    if (result.affectedRows === 0) {
+      res.status(404).send({ message: "No team found with this ID" });
+      return;
+    }
+    res.send({ message: `Team with ID ${id} has been updated successfully` });
+  });
 });
 
 app.delete("/api/v1/team/delete/:id", (req, res) => {
@@ -850,11 +894,20 @@ app.put("/api/v1/images/update/:id", upload.single("image"), (req, res) => {
   const id = req.params.id;
   const { kategori } = req.body;
 
-  // Jika ada file gambar yang diupload
-  let image = req.file ? `/images/${req.file.filename}` : null;
+  let sql, params;
 
-  const sql = "UPDATE images SET image = ?, kategori = ? WHERE id = ?";
-  db.query(sql, [image, kategori, id], (err, result) => {
+  if (req.file) {
+    // Jika ada file gambar yang diupload, update kolom image juga
+    const image = `/images/${req.file.filename}`;
+    sql = "UPDATE images SET image = ?, kategori = ? WHERE id = ?";
+    params = [image, kategori, id];
+  } else {
+    // Jika tidak ada file gambar, hanya update kolom kategori
+    sql = "UPDATE images SET kategori = ? WHERE id = ?";
+    params = [kategori, id];
+  }
+
+  db.query(sql, params, (err, result) => {
     if (err) {
       res.status(500).send({ message: "Error updating images", error: err });
       return;
@@ -863,7 +916,7 @@ app.put("/api/v1/images/update/:id", upload.single("image"), (req, res) => {
       res.status(404).send({ message: "No images found with this ID" });
       return;
     }
-    res.send({ message: `images with ID ${id} has been updated successfully` });
+    res.send({ message: `Image with ID ${id} has been updated successfully` });
   });
 });
 

@@ -6,10 +6,12 @@ const EditImages = () => {
   const [dataImages, setdataImages] = useState(null);
   const [updateImages, setupdateImages] = useState({
     kategori: "",
+    image: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [editImage, setEditImage] = useState(false);
 
   const endPoint = `http://localhost:3000/api/v1/images/${id}`;
   const endPointPut = `http://localhost:3000/api/v1/images/update/${id}`;
@@ -23,7 +25,8 @@ const EditImages = () => {
         const imagesData = data.payload.datas[0]; // Ambil data pertama jika banyak
         setdataImages(imagesData);
         setupdateImages({
-          images: imagesData.images || "",
+          image: imagesData.image || "",
+          kategori: imagesData.kategori || "",
         });
       } catch (error) {
         console.error(error);
@@ -37,6 +40,12 @@ const EditImages = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
+    if (file) {
+      setupdateImages({
+        ...updateImages,
+        image: URL.createObjectURL(file), // Tampilkan preview gambar yang dipilih
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -46,6 +55,8 @@ const EditImages = () => {
     formData.append("kategori", updateImages.kategori);
     if (imageFile) {
       formData.append("image", imageFile);
+    } else {
+      formData.append("image", updateImages.image);
     }
 
     try {
@@ -70,6 +81,10 @@ const EditImages = () => {
     });
   };
 
+  const handleEditImage = () => {
+    setEditImage(!editImage);
+  };
+
   return (
     <AuthLayout>
       <section className="flex flex-col gap-y-5 items-center w-full">
@@ -82,14 +97,30 @@ const EditImages = () => {
                 <label htmlFor="image" className="text-black font-bold">
                   Ganti Gambar
                 </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  placeholder="Input your title"
-                  className="p-3 rounded-lg border-black border-2"
-                  onChange={handleImageChange}
-                />
+                {updateImages.image && (
+                  <img
+                    src={`http://localhost:3000${updateImages.image}`}
+                    alt="Current product"
+                    className="w-32 h-32 object-cover mb-3"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={handleEditImage}
+                  className="bg-gradient-to-l from-[#67BD5E] to-[#467840] text-white px-4 py-2 rounded-lg mb-3"
+                >
+                  {editImage ? "Batal Ubah Gambar" : "Ubah Gambar"}
+                </button>
+                {editImage && (
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/*"
+                    className="p-3 rounded-lg border-black border-2"
+                    onChange={handleImageChange}
+                  />
+                )}
               </div>
               <select
                 name="kategori"

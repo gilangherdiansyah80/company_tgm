@@ -110,6 +110,7 @@ const TambahArticle = () => {
               type="file"
               name="image"
               id="image"
+              accept="image/*"
               placeholder="Input your title"
               className="p-3 rounded-lg border-black border-2"
               onChange={handleImageChange}
