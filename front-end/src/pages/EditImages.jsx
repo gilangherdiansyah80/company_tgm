@@ -135,13 +135,14 @@ const EditImages = () => {
                 <option value="banner">Banner</option>
                 <option value="pop up">Pop Up</option>
                 <option value="kolaborasi">Kolaborasi</option>
+                <option value="banner iklan">Banner Iklan</option>
               </select>
 
               <div className="flex gap-x-3 w-full md:text-xl">
                 <button
                   type="button"
                   className="bg-red-500 px-5 py-2 md:px-6 md:py-4 rounded-lg text-white w-1/2"
-                  onClick={() => navigate("/article")}
+                  onClick={() => navigate("/images")}
                 >
                   Batal
                 </button>

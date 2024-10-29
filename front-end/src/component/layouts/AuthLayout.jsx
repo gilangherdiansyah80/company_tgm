@@ -19,7 +19,7 @@ const Home = ({ title, children }) => {
 
   const handleLogout = () => {
     navigate("/");
-    localStorage.removeItem("user");
+    localStorage.removeItem("admin");
   };
 
   return (

@@ -7,6 +7,7 @@ const About = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
+  const [loggedInRole, setLoggedInRole] = useState(""); // Menyimpan role user yang login
 
   const getAbout = async () => {
     const response = await fetch("http://localhost:3000/api/v1/about");
@@ -62,8 +63,21 @@ const About = () => {
   }, 3000);
 
   useEffect(() => {
+    const admin = JSON.parse(localStorage.getItem("admin"));
+    const role = admin.role;
+    setLoggedInRole(role);
     getAbout();
   }, []);
+
+  const stripHTML = (html, length) => {
+    const tempP = document.createElement("p");
+    tempP.innerHTML = html;
+    const text = tempP.textContent || tempP.innerText || "";
+    return text.length > length ? text.slice(0, length) + "..." : text;
+  };
+
+  const isCurrentRole =
+    loggedInRole === "admin utama" || loggedInRole === "admin kedua";
 
   return (
     <AuthLayout title={"About"}>
@@ -71,9 +85,11 @@ const About = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <Link to="/tambahAbout">
-          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-        </Link>
+        {isCurrentRole && (
+          <Link to="/tambahAbout">
+            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+          </Link>
+        )}
       </header>
 
       <section className="overflow-x-auto md:overflow-hidden md:w-full">
@@ -101,22 +117,42 @@ const About = () => {
                 </td>
                 <td className="border border-black px-4 py-2">{item.title}</td>
                 <td className="border border-black px-4 py-2 text-black">
-                  {item.description}
+                  {stripHTML(item.description, 156)}
                 </td>
                 <td className="border border-black px-4 py-2">
                   <div className="flex w-full gap-x-3">
-                    <Link
-                      to={`/editabout/${item.id}`}
-                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
-                    >
-                      Edit About
-                    </Link>
-                    <button
-                      className="bg-red-700 rounded-lg p-3 text-white w-1/2"
-                      onClick={() => confirmDelete(item.id)}
-                    >
-                      Hapus About
-                    </button>
+                    {isCurrentRole ? (
+                      <>
+                        <Link
+                          to={`/editabout/${item.id}`}
+                          className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                        >
+                          <button>Edit About</button>
+                        </Link>
+                        <button
+                          className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                          onClick={() => confirmDelete(item.id)}
+                        >
+                          Hapus About
+                        </button>
+                      </>
+                    ) : (
+                      // Jika bukan admin utama, tampilkan tombol non-aktif
+                      <>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Edit About
+                        </button>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Hapus About
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

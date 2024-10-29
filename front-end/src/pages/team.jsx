@@ -7,6 +7,7 @@ const Team = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
+  const [loggedInRole, setLoggedInRole] = useState("");
 
   const getTeam = async () => {
     const response = await fetch("http://localhost:3000/api/v1/team");
@@ -62,8 +63,14 @@ const Team = () => {
   }, 3000);
 
   useEffect(() => {
+    const admin = JSON.parse(localStorage.getItem("admin"));
+    const role = admin.role;
+    setLoggedInRole(role);
     getTeam();
   }, []);
+
+  const isCurrentRole =
+    loggedInRole === "admin utama" || loggedInRole === "admin kedua";
 
   return (
     <AuthLayout title={"Team"}>
@@ -71,9 +78,11 @@ const Team = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <Link to="/tambahTeam">
-          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-        </Link>
+        {isCurrentRole && (
+          <Link to="/tambahTeam">
+            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+          </Link>
+        )}
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
@@ -113,19 +122,39 @@ const Team = () => {
                   <i className="fab fa-instagram text-2xl md:text-4xl"></i>
                 </a>
               </div>
-              <div className="flex w-full gap-x-3 md:text-xl">
-                <Link
-                  to={`/editteam/${item.id}`}
-                  className="w-1/2 bg-white p-3 text-black rounded-lg text-center"
-                >
-                  <button>Edit Team</button>
-                </Link>
-                <button
-                  className="bg-red-700 rounded-lg p-3 text-white w-1/2"
-                  onClick={() => confirmDelete(item.id)}
-                >
-                  Hapus Team
-                </button>
+              <div className="flex w-full gap-x-3">
+                {isCurrentRole ? (
+                  <>
+                    <Link
+                      to={`/editteam/${item.id}`}
+                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                    >
+                      <button>Edit Team</button>
+                    </Link>
+                    <button
+                      className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                      onClick={() => confirmDelete(item.id)}
+                    >
+                      Hapus Team
+                    </button>
+                  </>
+                ) : (
+                  // Jika bukan admin utama, tampilkan tombol non-aktif
+                  <>
+                    <button
+                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                      disabled
+                    >
+                      Edit Team
+                    </button>
+                    <button
+                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                      disabled
+                    >
+                      Hapus Team
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))}

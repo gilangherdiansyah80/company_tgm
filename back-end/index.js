@@ -61,12 +61,12 @@ app.get("/api/v1/admin/:name", (req, res) => {
 
 app.post("/api/v1/admin/create", (req, res) => {
   const data = req.body;
-  const { username, password } = data;
+  const { username, password, role } = data;
 
   try {
     // Cek apakah username sudah ada
     const sql = "SELECT * FROM admin WHERE username = ?";
-    db.query(sql, [username], (err, result) => {
+    db.query(sql, [username, role], (err, result) => {
       if (err) {
         response(500, null, "Failed to retrieve Admin data", res);
       } else if (result.length > 0) {
@@ -77,8 +77,9 @@ app.post("/api/v1/admin/create", (req, res) => {
           if (err) {
             response(500, null, "Failed to hash password", res);
           } else {
-            const sql = "INSERT INTO admin (username, password) VALUES (?, ?)";
-            db.query(sql, [username, hash], (err, result) => {
+            const sql =
+              "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
+            db.query(sql, [username, hash, role], (err, result) => {
               if (err) {
                 response(500, null, "Failed to insert Admin record", res);
               } else {
@@ -144,7 +145,7 @@ app.post("/api/v1/admin/login", (req, res) => {
 
 app.put("/api/v1/admin/update/:username", (req, res) => {
   const user = req.params.username;
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   try {
     bcrypt.hash(password, 14, (err, hash) => {
@@ -152,8 +153,8 @@ app.put("/api/v1/admin/update/:username", (req, res) => {
         response(500, null, "Failed to hash password", res);
       } else {
         const sql =
-          "UPDATE admin SET username = ?, password = ? WHERE username = ?";
-        db.query(sql, [username, hash, user], (err, result) => {
+          "UPDATE admin SET username = ?, password = ?, role = ? WHERE username = ?";
+        db.query(sql, [username, hash, role, user], (err, result) => {
           if (err) {
             response(500, null, "Failed to insert Admin record", res);
           } else {

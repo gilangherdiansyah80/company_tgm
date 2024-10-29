@@ -7,6 +7,7 @@ const EditUser = () => {
   const [updateUser, setupdateUser] = useState({
     username: "",
     password: "",
+    role: "",
   });
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const EditUser = () => {
           setupdateUser({
             username: userData.username || "", // Set username jika ada, jika tidak, set sebagai string kosong
             password: userData.password || "", // Set password sebagai string kosong agar bisa diubah
+            role: userData.role || "",
           });
         } else {
           throw new Error("Data user tidak ditemukan");
@@ -108,6 +110,25 @@ const EditUser = () => {
                   onChange={handleChange}
                   className="border-black border-2 rounded-md p-2 md:text-xl"
                 />
+              </div>
+
+              <div className="flex flex-col gap-y-2 md:text-xl">
+                <label htmlFor="role" className="text-black font-bold">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  id="role"
+                  className="p-3 rounded-lg border-black border-2"
+                  value={updateUser.role}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Pilih Role</option>
+                  <option value="admin utama">Admin Utama</option>
+                  <option value="admin kedua">Admin Kedua</option>
+                  <option value="admin ketiga">Admin Ketiga</option>
+                </select>
               </div>
 
               <div className="flex gap-x-3 w-full">

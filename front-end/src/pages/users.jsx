@@ -7,7 +7,7 @@ const Users = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
-  const [loggedInUsername, setLoggedInUsername] = useState(""); // Tambahkan state untuk username yang sedang login
+  const [loggedInRole, setLoggedInRole] = useState(""); // Menyimpan role user yang login
 
   const getUsers = async () => {
     const response = await fetch("http://localhost:3000/api/v1/admin");
@@ -40,8 +40,9 @@ const Users = () => {
   };
 
   useEffect(() => {
-    const username = localStorage.getItem("user");
-    setLoggedInUsername(username); // Simpan username yang sedang login
+    const admin = localStorage.getItem("admin");
+    const role = JSON.parse(admin).role;
+    setLoggedInRole(role); // Simpan role user yang login
     getUsers();
   }, []);
 
@@ -68,9 +69,7 @@ const Users = () => {
     }
   }, 3000);
 
-  const isCurrentUser = (username) => {
-    return loggedInUsername === username; // Cek apakah user yang login sama dengan user di list
-  };
+  const isCurrentUserAdminUtama = loggedInRole === "admin utama"; // Cek apakah user login adalah admin utama
 
   return (
     <AuthLayout title={"Users"}>
@@ -78,9 +77,11 @@ const Users = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <Link to="/tambahuser">
-          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-        </Link>
+        {isCurrentUserAdminUtama && ( // Tampilkan tombol tambah jika admin utama
+          <Link to="/tambahuser">
+            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+          </Link>
+        )}
       </header>
 
       <section className="overflow-x-auto lg:overflow-hidden lg:w-full">
@@ -95,52 +96,69 @@ const Users = () => {
                 Password
               </th>
               <th className="border border-black px-4 py-2 text-center">
+                Role
+              </th>
+              <th className="border border-black px-4 py-2 text-center">
                 Aksi
               </th>
             </tr>
           </thead>
           <tbody>
-            {dataUsers.map((item) => {
-              const isCurrent = isCurrentUser(item.username); // Cek apakah user adalah user yang login
-              return (
-                <tr
-                  key={item.id}
-                  className="bg-white hover:bg-gray-100 text-center"
-                >
-                  <td className="border border-black px-4 py-2 text-black">
-                    {item.id}
-                  </td>
-                  <td className="border border-black px-4 py-2">
-                    {item.username}
-                  </td>
-                  <td className="border border-black px-4 py-2 text-black">
-                    {item.password}
-                  </td>
-                  <td className="border border-black px-4 py-2">
-                    <div className="flex w-full gap-x-3">
-                      <Link
-                        to={`/edituser/${item.username}`}
-                        className={`w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black ${
-                          isCurrent ? "" : "opacity-50 cursor-not-allowed"
-                        }`} // Nonaktifkan jika bukan akun yang login
-                        onClick={(e) => !isCurrent && e.preventDefault()} // Cegah tindakan jika bukan akun yang login
-                      >
-                        <button disabled={!isCurrent}>Edit User</button>
-                      </Link>
-                      <button
-                        className={`bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl ${
-                          isCurrent ? "" : "opacity-50 cursor-not-allowed"
-                        }`} // Nonaktifkan tombol hapus jika bukan akun yang login
-                        onClick={() => isCurrent && confirmDelete(item.id)} // Cegah tindakan jika bukan akun yang login
-                        disabled={!isCurrent}
-                      >
-                        Hapus User
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {dataUsers.map((item) => (
+              <tr
+                key={item.id}
+                className="bg-white hover:bg-gray-100 text-center"
+              >
+                <td className="border border-black px-4 py-2 text-black">
+                  {item.id}
+                </td>
+                <td className="border border-black px-4 py-2">
+                  {item.username}
+                </td>
+                <td className="border border-black px-4 py-2 text-black">
+                  {item.password}
+                </td>
+                <td className="border border-black px-4 py-2 text-black">
+                  {item.role}
+                </td>
+                <td className="border border-black px-4 py-2">
+                  <div className="flex w-full gap-x-3">
+                    {isCurrentUserAdminUtama ? (
+                      <>
+                        <Link
+                          to={`/edituser/${item.username}`}
+                          className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                        >
+                          <button>Edit User</button>
+                        </Link>
+                        <button
+                          className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                          onClick={() => confirmDelete(item.id)}
+                        >
+                          Hapus User
+                        </button>
+                      </>
+                    ) : (
+                      // Jika bukan admin utama, tampilkan tombol non-aktif
+                      <>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Edit User
+                        </button>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Hapus User
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </section>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Login = () => {
   const [dataForm, setDataForm] = useState({
@@ -6,12 +6,24 @@ const Login = () => {
     password: "",
   });
 
+  const [dataAdmin, setDataAdmin] = useState([]);
+
   const handleChange = (e) => {
     setDataForm({
       ...dataForm,
       [e.target.id]: e.target.value,
     });
   };
+
+  const getAdmin = async () => {
+    const response = await fetch("http://localhost:3000/api/v1/admin");
+    const data = await response.json();
+    setDataAdmin(data.payload.datas);
+  };
+
+  useEffect(() => {
+    getAdmin();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +41,10 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem("user", dataForm.username);
+        const admin = dataAdmin.find(
+          (admin) => admin.username === dataForm.username
+        );
+        if (admin) localStorage.setItem("admin", JSON.stringify(admin));
         alert("Login Berhasil");
         window.location.href = "/home";
       } else {

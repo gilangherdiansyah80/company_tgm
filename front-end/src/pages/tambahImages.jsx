@@ -101,6 +101,7 @@ const TambahImages = () => {
               <option value="banner">Banner</option>
               <option value="pop up">Pop Up</option>
               <option value="kolaborasi">Kolaborasi</option>
+              <option value="banner iklan">Banner Iklan</option>
             </select>
           </div>
           <div className="flex gap-x-3 w-full">

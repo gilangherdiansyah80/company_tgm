@@ -7,6 +7,7 @@ const Images = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
+  const [loggedInRole, setLoggedInRole] = useState("");
 
   const getImages = async () => {
     const response = await fetch("http://localhost:3000/api/v1/Images");
@@ -62,8 +63,14 @@ const Images = () => {
   }, 3000);
 
   useEffect(() => {
+    const admin = JSON.parse(localStorage.getItem("admin"));
+    const role = admin.role;
+    setLoggedInRole(role);
     getImages();
   }, []);
+
+  const isCurrentRole =
+    loggedInRole === "admin utama" || loggedInRole === "admin kedua";
 
   return (
     <AuthLayout title={"Images"}>
@@ -71,9 +78,11 @@ const Images = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        <Link to="/tambahImages">
-          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-        </Link>
+        {isCurrentRole && (
+          <Link to="/tambahImages">
+            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+          </Link>
+        )}
       </header>
 
       <section className="overflow-x-auto md:overflow-hidden md:w-full">
@@ -113,18 +122,38 @@ const Images = () => {
                 </td>
                 <td className="border border-black px-4 py-2">
                   <div className="flex w-full gap-x-3">
-                    <Link
-                      to={`/editimages/${item.id}`}
-                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
-                    >
-                      Edit Images
-                    </Link>
-                    <button
-                      className="bg-red-700 rounded-lg p-3 text-white w-1/2"
-                      onClick={() => confirmDelete(item.id)}
-                    >
-                      Hapus Images
-                    </button>
+                    {isCurrentRole ? (
+                      <>
+                        <Link
+                          to={`/editimages/${item.id}`}
+                          className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                        >
+                          <button>Edit Gambar</button>
+                        </Link>
+                        <button
+                          className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                          onClick={() => confirmDelete(item.id)}
+                        >
+                          Hapus Gambar
+                        </button>
+                      </>
+                    ) : (
+                      // Jika bukan admin utama, tampilkan tombol non-aktif
+                      <>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Edit Gambar
+                        </button>
+                        <button
+                          className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
+                          disabled
+                        >
+                          Hapus Gambar
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
