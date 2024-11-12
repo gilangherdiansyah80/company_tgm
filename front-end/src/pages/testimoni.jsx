@@ -7,7 +7,6 @@ const Testimoni = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
-  const [loggedInRole, setLoggedInRole] = useState(""); // Menyimpan role user yang login
 
   const getTestimoni = async () => {
     const response = await fetch("http://localhost:3000/api/v1/testimoni");
@@ -63,14 +62,8 @@ const Testimoni = () => {
   }, 3000);
 
   useEffect(() => {
-    const admin = JSON.parse(localStorage.getItem("admin"));
-    const role = admin.role;
-    setLoggedInRole(role);
     getTestimoni();
   }, []);
-
-  const isCurrentRole =
-    loggedInRole === "admin utama" || loggedInRole === "admin kedua";
 
   return (
     <AuthLayout title="Testimoni">
@@ -78,11 +71,9 @@ const Testimoni = () => {
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        {isCurrentRole && (
-          <Link to="/tambahTestimoni">
-            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-          </Link>
-        )}
+        <Link to="/tambahTestimoni">
+          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+        </Link>
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
@@ -101,38 +92,20 @@ const Testimoni = () => {
               <p className="md:text-xl">{item.jabatan}</p>
               <p className="md:text-xl">{item.description}</p>
               <div className="flex w-full gap-x-3">
-                {isCurrentRole ? (
-                  <>
-                    <Link
-                      to={`/edittestimoni/${item.id}`}
-                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
-                    >
-                      <button>Edit Testimoni</button>
-                    </Link>
-                    <button
-                      className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
-                      onClick={() => confirmDelete(item.id)}
-                    >
-                      Hapus Testimoni
-                    </button>
-                  </>
-                ) : (
-                  // Jika bukan admin utama, tampilkan tombol non-aktif
-                  <>
-                    <button
-                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
-                      disabled
-                    >
-                      Edit Testimoni
-                    </button>
-                    <button
-                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
-                      disabled
-                    >
-                      Hapus Testimoni
-                    </button>
-                  </>
-                )}
+                <>
+                  <Link
+                    to={`/edittestimoni/${item.id}`}
+                    className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                  >
+                    <button>Edit Testimoni</button>
+                  </Link>
+                  <button
+                    className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                    onClick={() => confirmDelete(item.id)}
+                  >
+                    Hapus Testimoni
+                  </button>
+                </>
               </div>
             </div>
           ))}

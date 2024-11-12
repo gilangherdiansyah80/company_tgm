@@ -7,20 +7,45 @@ const TambahUser = () => {
     username: "",
     password: "",
     role: "",
+    fiturIds: [],
   });
+  const [features, setFeatures] = useState([]);
   const [userAdded, setUserAdded] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setDataForm({
-      ...dataForm,
-      [e.target.id]: e.target.value,
+    const { id, value } = e.target;
+    setDataForm((prev) => {
+      const newDataForm = {
+        ...prev,
+        [id]: value,
+      };
+      // Jika role adalah "admin utama", tambahkan semua fitur
+      if (value === "admin utama") {
+        newDataForm.fiturIds = features.map((feature) =>
+          feature.id_fitur.toString()
+        );
+      } else {
+        newDataForm.fiturIds = []; // Reset fiturIds jika bukan admin utama
+      }
+      return newDataForm;
+    });
+  };
+
+  const handleFeatureChange = (e) => {
+    const { value, checked } = e.target;
+    setDataForm((prev) => {
+      const newFiturIds = checked
+        ? [...prev.fiturIds, value] // Tambah jika dicentang
+        : prev.fiturIds.filter((id) => id !== value); // Hapus jika tidak dicentang
+
+      console.log("Updated fiturIds:", newFiturIds); // Debugging
+      return { ...prev, fiturIds: newFiturIds };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const response = await fetch(
         "http://localhost:3000/api/v1/admin/create",
@@ -33,15 +58,17 @@ const TambahUser = () => {
             username: dataForm.username,
             password: dataForm.password,
             role: dataForm.role,
+            fiturIds: dataForm.fiturIds,
           }),
         }
       );
+
       const data = await response.json();
       if (response.ok) {
         setUserAdded(true);
         setTimeout(() => {
-          navigate("/users"); // Redirect menggunakan useNavigate
-        }, 3000); // Redirect setelah 3 detik
+          navigate("/users");
+        }, 3000);
       } else {
         alert("Gagal Menambahkan User");
         console.log(`Error: ${data.message}`);
@@ -52,13 +79,31 @@ const TambahUser = () => {
   };
 
   useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/v1/features");
+        const data = await response.json();
+        if (response.ok) {
+          setFeatures(data.payload.datas);
+        } else {
+          console.error("Gagal memuat fitur");
+        }
+      } catch (error) {
+        console.error("Error fetching features:", error);
+      }
+    };
+
+    fetchFeatures();
+  }, []);
+
+  useEffect(() => {
     let timer;
     if (userAdded) {
       timer = setTimeout(() => {
         setUserAdded(false);
       }, 3000);
     }
-    return () => clearTimeout(timer); // Cleanup saat komponen tidak lagi di-render
+    return () => clearTimeout(timer);
   }, [userAdded]);
 
   const handleOpenPassword = () => {
@@ -82,7 +127,6 @@ const TambahUser = () => {
             </label>
             <input
               type="text"
-              name="username"
               id="username"
               placeholder="Input your username"
               className="p-3 rounded-lg border-black border-2 md:text-xl"
@@ -103,7 +147,7 @@ const TambahUser = () => {
                 type="password"
                 id="password"
                 placeholder="*******"
-                className="w-full  border-black border-2 p-3 rounded-lg md:text-xl"
+                className="w-full border-black border-2 p-3 rounded-lg md:text-xl"
                 value={dataForm.password}
                 onChange={handleChange}
                 required
@@ -120,7 +164,6 @@ const TambahUser = () => {
               Role
             </label>
             <select
-              name="role"
               id="role"
               className="p-3 rounded-lg border-black border-2"
               value={dataForm.role}
@@ -130,8 +173,32 @@ const TambahUser = () => {
               <option value="">Pilih Role</option>
               <option value="admin utama">Admin Utama</option>
               <option value="admin kedua">Admin Kedua</option>
-              <option value="admin ketiga">Admin Ketiga</option>
             </select>
+          </div>
+
+          <div className="flex flex-col gap-y-2 md:text-xl">
+            <label className="text-black font-bold">Fitur</label>
+            {dataForm.role !== "admin utama" &&
+              features.map((feature) => (
+                <div key={feature.id_fitur} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`feature-${feature.id_fitur}`}
+                    value={feature.id_fitur.toString()} // Pastikan ini adalah string
+                    checked={dataForm.fiturIds.includes(
+                      feature.id_fitur.toString()
+                    )} // Cek jika fitur sudah terpilih
+                    onChange={handleFeatureChange}
+                    className="mr-2"
+                  />
+                  <label
+                    htmlFor={`feature-${feature.id_fitur}`}
+                    className="text-black"
+                  >
+                    {feature.nama_fitur}
+                  </label>
+                </div>
+              ))}
           </div>
 
           <div className="flex gap-x-3 w-full">

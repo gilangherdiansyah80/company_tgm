@@ -7,6 +7,7 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import util from "util";
 // import sanitizeHtml from "sanitize-html";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Ubah db.query menjadi Promise
+const query = util.promisify(db.query).bind(db);
+
 // Crud Admin
 app.get("/api/v1/admin", (req, res) => {
   const sql = "SELECT * FROM admin";
@@ -46,55 +50,54 @@ app.get("/api/v1/admin", (req, res) => {
   });
 });
 
-app.get("/api/v1/admin/:name", (req, res) => {
-  const name = req.params.name;
-  const sql = "SELECT * FROM admin WHERE username = ?";
+app.post("/api/v1/admin/create", async (req, res) => {
+  const { username, password, role, fiturIds } = req.body; // fiturIds adalah array ID fitur yang diberikan
 
-  db.query(sql, [name], (err, result) => {
-    if (err) {
-      response(500, null, "Failed to retrieve Admin data", res);
-    } else {
-      response(200, result, "Data From Table Admin", res);
-    }
-  });
-});
-
-app.post("/api/v1/admin/create", (req, res) => {
-  const data = req.body;
-  const { username, password, role } = data;
+  if (!Array.isArray(fiturIds) || fiturIds.length === 0) {
+    return res.status(400).json({ message: "Invalid or empty fiturIds" });
+  }
 
   try {
     // Cek apakah username sudah ada
-    const sql = "SELECT * FROM admin WHERE username = ?";
-    db.query(sql, [username, role], (err, result) => {
-      if (err) {
-        response(500, null, "Failed to retrieve Admin data", res);
-      } else if (result.length > 0) {
-        response(400, null, "Username already exists", res);
-      } else {
-        // Jika username belum ada, lanjutkan pengecekan password
-        bcrypt.hash(password, 14, (err, hash) => {
-          if (err) {
-            response(500, null, "Failed to hash password", res);
-          } else {
-            const sql =
-              "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
-            db.query(sql, [username, hash, role], (err, result) => {
-              if (err) {
-                response(500, null, "Failed to insert Admin record", res);
-              } else {
-                res.status(201).json({
-                  message: "Admin created successfully",
-                  id: result.insertId,
-                });
-              }
-            });
-          }
-        });
-      }
+    const checkSql = "SELECT * FROM admin WHERE username = ?";
+    const existingAdmin = await query(checkSql, [username]);
+
+    if (existingAdmin.length > 0) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 14);
+
+    // Tambahkan admin ke tabel `admin`
+    const insertAdminSql =
+      "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
+    const result = await query(insertAdminSql, [
+      username,
+      hashedPassword,
+      role,
+    ]);
+    const adminId = result.insertId; // ID admin yang baru saja ditambahkan
+
+    // Tambahkan entri di tabel `user_fitur` untuk setiap fitur ID yang diberikan
+    const userFiturValues = fiturIds.map((fiturId) => [adminId, fiturId]);
+    const insertUserFiturSql =
+      "INSERT INTO user_fitur (user_id, fitur_id) VALUES ?";
+
+    // Insert fitur data untuk admin yang baru ditambahkan
+    await query(insertUserFiturSql, [userFiturValues]);
+
+    // Respon sukses
+    res.status(201).json({
+      message: "Admin and features added successfully",
+      id: adminId,
     });
   } catch (error) {
-    response(500, null, "Internal server error", res);
+    console.error("Error during admin creation:", error); // Logging error untuk debugging
+    res.status(500).json({
+      message: "Failed to add admin or user features",
+      error: error.message,
+    });
   }
 });
 
@@ -108,6 +111,48 @@ app.get("/api/v1/admin/:id", (req, res) => {
       response(404, null, "Admin not found", res);
     } else {
       response(200, result, "Data From Table Admin", res);
+    }
+  });
+});
+
+app.get("/api/v1/userFitur", (req, res) => {
+  // Query untuk mengambil data dari user_fitur dan join dengan tabel fitur
+  const sql = `
+    SELECT uf.user_id, uf.fitur_id, f.nama_fitur AS nama_fitur
+    FROM user_fitur uf
+    JOIN fitur f ON uf.fitur_id = f.id_fitur
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve user_fitur data", res);
+    } else {
+      response(200, result, "Data From Table user_fitur", res);
+    }
+  });
+});
+
+app.get("/api/v1/userFitur/:id", (req, res) => {
+  const sql = "SELECT * FROM user_fitur WHERE user_id = ?";
+  const id = req.params.id;
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve user_fitur data", res);
+    } else if (result.length === 0) {
+      response(404, null, "user_fitur not found", res);
+    } else {
+      response(200, result, "Data From Table user_fitur", res);
+    }
+  });
+});
+
+app.get("/api/v1/features", (req, res) => {
+  const sql = "SELECT * FROM fitur";
+  db.query(sql, (err, result) => {
+    if (err) {
+      response(500, null, "Failed to retrieve fitur data", res);
+    } else {
+      response(200, result, "Data From Table fitur", res);
     }
   });
 });
@@ -143,44 +188,131 @@ app.post("/api/v1/admin/login", (req, res) => {
   }
 });
 
-app.put("/api/v1/admin/update/:username", (req, res) => {
-  const user = req.params.username;
-  const { username, password, role } = req.body;
+app.put("/api/v1/admin/update/:id", async (req, res) => {
+  const id = req.params.id;
+  const { username, password, role, fiturIds = [] } = req.body;
 
   try {
-    bcrypt.hash(password, 14, (err, hash) => {
+    // Update data di tabel `admin`
+    let updateAdminSql;
+    let updateParams;
+
+    if (password) {
+      // Hash password jika diberikan
+      const hash = await bcrypt.hash(password, 14);
+      updateAdminSql =
+        "UPDATE admin SET username = ?, password = ?, role = ? WHERE id = ?";
+      updateParams = [username, hash, role, id];
+    } else {
+      // Update tanpa password jika tidak diberikan
+      updateAdminSql = "UPDATE admin SET username = ?, role = ? WHERE id = ?";
+      updateParams = [username, role, id];
+    }
+
+    // Eksekusi query untuk update admin
+    db.query(updateAdminSql, updateParams, (err, result) => {
       if (err) {
-        response(500, null, "Failed to hash password", res);
-      } else {
-        const sql =
-          "UPDATE admin SET username = ?, password = ?, role = ? WHERE username = ?";
-        db.query(sql, [username, hash, role, user], (err, result) => {
-          if (err) {
-            response(500, null, "Failed to insert Admin record", res);
-          } else {
-            res.status(201).json({ message: "Data updated successfully" });
-          }
-        });
+        console.error("Failed to update Admin record:", err);
+        return res
+          .status(500)
+          .json({ message: "Failed to update Admin record" });
       }
+
+      // Hapus fitur lama dan tambahkan fitur baru di tabel user_fitur
+      const deleteUserFiturSql = "DELETE FROM user_fitur WHERE user_id = ?";
+      db.query(deleteUserFiturSql, [id], (err) => {
+        if (err) {
+          console.error("Failed to delete old user_fitur entries:", err);
+          return res
+            .status(500)
+            .json({ message: "Failed to delete old features" });
+        }
+
+        // Tambahkan entri baru ke user_fitur jika fiturIds tidak kosong
+        if (fiturIds.length > 0) {
+          const userFiturValues = fiturIds.map((fiturId) => [id, fiturId]);
+          const insertUserFiturSql =
+            "INSERT INTO user_fitur (user_id, fitur_id) VALUES ?";
+
+          db.query(insertUserFiturSql, [userFiturValues], (err) => {
+            if (err) {
+              console.error("Failed to insert new user_fitur entries:", err);
+              return res
+                .status(500)
+                .json({ message: "Failed to insert new features" });
+            }
+            res
+              .status(200)
+              .json({ message: "Admin and features updated successfully" });
+          });
+        } else {
+          // Jika tidak ada fitur yang diberikan, langsung selesai
+          res.status(200).json({
+            message: "Admin updated successfully, no features to update",
+          });
+        }
+      });
     });
   } catch (error) {
-    response(500, null, "Internal server error", res);
+    console.error("Internal server error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 app.delete("/api/v1/admin/delete/:id", (req, res) => {
   const id = req.params.id;
-  const sql = "DELETE FROM admin WHERE id = ?";
-  db.query(sql, [id], (err, result) => {
+
+  // Mulai transaksi
+  db.beginTransaction((err) => {
     if (err) {
-      res.status(500).send({ message: "Error deleting Admin", error: err });
-      return;
+      return res
+        .status(500)
+        .send({ message: "Error starting transaction", error: err });
     }
-    if (result.affectedRows === 0) {
-      res.status(404).send({ message: "No Admin found with this ID" });
-      return;
-    }
-    res.send({ message: `Admin with ID ${id} has been deleted successfully` });
+
+    // Hapus dari tabel user_fitur terlebih dahulu
+    const deleteFiturSql = "DELETE FROM user_fitur WHERE user_id = ?";
+    db.query(deleteFiturSql, [id], (err, result) => {
+      if (err) {
+        return db.rollback(() => {
+          res
+            .status(500)
+            .send({ message: "Error deleting from user_fitur", error: err });
+        });
+      }
+
+      // Hapus dari tabel admin
+      const deleteAdminSql = "DELETE FROM admin WHERE id = ?";
+      db.query(deleteAdminSql, [id], (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            res
+              .status(500)
+              .send({ message: "Error deleting Admin", error: err });
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).send({ message: "No Admin found with this ID" });
+          });
+        }
+
+        // Jika kedua query berhasil, commit transaksi
+        db.commit((err) => {
+          if (err) {
+            return db.rollback(() => {
+              res
+                .status(500)
+                .send({ message: "Error committing transaction", error: err });
+            });
+          }
+          res.send({
+            message: `Admin with ID ${id} and related features have been deleted successfully`,
+          });
+        });
+      });
+    });
   });
 });
 

@@ -7,7 +7,6 @@ const Article = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [afterDelete, setAfterDelete] = useState(false);
-  const [loggedInRole, setLoggedInRole] = useState("");
 
   const getArticle = async () => {
     const response = await fetch("http://localhost:3000/api/v1/article");
@@ -63,9 +62,6 @@ const Article = () => {
   }, 3000);
 
   useEffect(() => {
-    const admin = JSON.parse(localStorage.getItem("admin"));
-    const role = admin.role;
-    setLoggedInRole(role);
     getArticle();
   }, []);
 
@@ -76,20 +72,15 @@ const Article = () => {
     return text.length > length ? text.slice(0, length) + "..." : text;
   };
 
-  const isCurrentRole =
-    loggedInRole === "admin utama" || loggedInRole === "admin kedua";
-
   return (
     <AuthLayout title={"Article"}>
       <header className="flex justify-between items-center">
         <p className="text-xl font-semibold md:text-2xl">
           Hi, admin have a nice day
         </p>
-        {isCurrentRole && (
-          <Link to="/tambahArticle">
-            <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
-          </Link>
-        )}
+        <Link to="/tambahArticle">
+          <i className="fas fa-plus text-black text-xl md:text-2xl"></i>
+        </Link>
       </header>
 
       <section className="flex flex-col gap-y-5 items-center">
@@ -122,38 +113,20 @@ const Article = () => {
                 <p>Kategori : {item.kategori}</p>
               </div>
               <div className="flex w-full gap-x-3">
-                {isCurrentRole ? (
-                  <>
-                    <Link
-                      to={`/editarticle/${item.id}`}
-                      className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
-                    >
-                      <button>Edit Artikel</button>
-                    </Link>
-                    <button
-                      className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
-                      onClick={() => confirmDelete(item.id)}
-                    >
-                      Hapus Artikel
-                    </button>
-                  </>
-                ) : (
-                  // Jika bukan admin utama, tampilkan tombol non-aktif
-                  <>
-                    <button
-                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
-                      disabled
-                    >
-                      Edit Artikel
-                    </button>
-                    <button
-                      className="w-1/2 bg-gray-300 p-3 text-gray-500 rounded-lg text-center border border-gray-300 cursor-not-allowed"
-                      disabled
-                    >
-                      Hapus Artikel
-                    </button>
-                  </>
-                )}
+                <>
+                  <Link
+                    to={`/editarticle/${item.id}`}
+                    className="w-1/2 bg-white p-3 text-black rounded-lg text-center border border-black"
+                  >
+                    <button>Edit Artikel</button>
+                  </Link>
+                  <button
+                    className="bg-red-700 rounded-lg p-3 text-white w-1/2 md:text-xl"
+                    onClick={() => confirmDelete(item.id)}
+                  >
+                    Hapus Artikel
+                  </button>
+                </>
               </div>
             </div>
           ))}

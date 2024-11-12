@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
-const Home = ({ title, children }) => {
+const AuthLayout = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLogout, setIsLogout] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get features from localStorage and map to an array of feature names
+  const fitur = JSON.parse(localStorage.getItem("fitur")) || [];
+  const adminFitur = fitur.map((item) => item.nama_fitur); // Extract nama_fitur
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
@@ -20,7 +24,44 @@ const Home = ({ title, children }) => {
   const handleLogout = () => {
     navigate("/");
     localStorage.removeItem("admin");
+    localStorage.removeItem("fitur");
   };
+
+  const menuItems = [
+    { name: "Home", path: "/home", icon: "fa-home", nama_fitur: "Home" },
+    { name: "Users", path: "/users", icon: "fa-users", nama_fitur: "users" },
+    {
+      name: "Product",
+      path: "/product",
+      icon: "fa-shopping-cart",
+      nama_fitur: "Product",
+    },
+    {
+      name: "Artikel",
+      path: "/article",
+      icon: "fa-newspaper",
+      nama_fitur: "Article",
+    },
+    {
+      name: "Testimoni",
+      path: "/testimoni",
+      icon: "fa-star",
+      nama_fitur: "Testimoni",
+    },
+    {
+      name: "Tentang Kami",
+      path: "/about",
+      icon: "fa-tags",
+      nama_fitur: "About",
+    },
+    { name: "Team", path: "/team", icon: "fa-users", nama_fitur: "Team" },
+    {
+      name: "Images",
+      path: "/images",
+      icon: "fa-images",
+      nama_fitur: "Images",
+    },
+  ];
 
   return (
     <div className="bg-white min-h-screen flex w-full">
@@ -54,252 +95,49 @@ const Home = ({ title, children }) => {
             Company TGM
           </h1>
         </section>
+
+        {/* Filter menu based on features owned */}
         <nav className={`flex flex-col w-3/6 ${isOpen ? "" : "mt-20"}`}>
           <ul className="w-full flex flex-col gap-y-5">
-            <Link
-              to="/home"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/home"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-home ${
-                    location.pathname === "/home"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/home"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Home</p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/users"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/users"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-users ${
-                    location.pathname === "/users"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/users"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Users</p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/product"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/product"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-shopping-cart ${
-                    location.pathname === "/product"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/product"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Product</p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/article"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/article"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-newspaper ${
-                    location.pathname === "/article"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/article"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Artikel</p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/testimoni"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/testimoni"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-star ${
-                    location.pathname === "/testimoni"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/testimoni"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>
-                    Testimoni
-                  </p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/about"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/about"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-tags ${
-                    location.pathname === "/about"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/about"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>
-                    Tentang Kami
-                  </p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/team"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/team"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-users ${
-                    location.pathname === "/team"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/team"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Team</p>
-                </p>
-              </li>
-            </Link>
-            <Link
-              to="/images"
-              className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
-                location.pathname === "/images"
-                  ? "bg-white text-black"
-                  : "hover:text-black hover:bg-white"
-              }`}
-              onClick={handleOpen}
-            >
-              <li
-                className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
-              >
-                <i
-                  className={`fas fa-images ${
-                    location.pathname === "/images"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                ></i>
-                <p
-                  className={`font-semibold ${
-                    location.pathname === "/images"
-                      ? "text-black"
-                      : "hover:text-black hover:bg-white"
-                  }`}
-                >
-                  <p className={`${isOpen ? "md:hidden" : "block"}`}>Images</p>
-                </p>
-              </li>
-            </Link>
+            {menuItems.map(
+              (item) =>
+                (item.nama_fitur === "users" ||
+                  adminFitur.includes(item.nama_fitur)) && (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`text-xl p-3 text-white w-[1000px] h-14 rounded-s-full right-0 ${
+                      location.pathname === item.path
+                        ? "bg-white text-black"
+                        : "hover:text-black hover:bg-white"
+                    }`}
+                    onClick={handleOpen}
+                  >
+                    <li
+                      className={`flex items-center gap-x-3 justify-center absolute md:text-2xl`}
+                    >
+                      <i
+                        className={`fas ${item.icon} ${
+                          location.pathname === item.path
+                            ? "text-black"
+                            : "hover:text-black hover:bg-white"
+                        }`}
+                      ></i>
+                      <p
+                        className={`font-semibold ${
+                          location.pathname === item.path
+                            ? "text-black"
+                            : "hover:text-black hover:bg-white"
+                        }`}
+                      >
+                        <span className={`${isOpen ? "md:hidden" : "block"}`}>
+                          {item.name}
+                        </span>
+                      </p>
+                    </li>
+                  </Link>
+                )
+            )}
           </ul>
         </nav>
       </aside>
@@ -357,4 +195,4 @@ const Home = ({ title, children }) => {
   );
 };
 
-export default Home;
+export default AuthLayout;

@@ -8,12 +8,40 @@ const EditUser = () => {
     username: "",
     password: "",
     role: "",
+    fiturIds: [],
   });
+  const [features, setFeatures] = useState([]);
+  const [userFeatures, setUserFeatures] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
 
   const endPoint = `http://localhost:3000/api/v1/admin/${id}`;
   const endPointPut = `http://localhost:3000/api/v1/admin/update/${id}`;
+  const endPointUserFitur = `http://localhost:3000/api/v1/userFitur/${id}`;
+
+  // Fetch user's features
+  useEffect(() => {
+    const fetchUserFeatures = async () => {
+      try {
+        const response = await fetch(endPointUserFitur);
+        const data = await response.json();
+        if (response.ok && data.payload?.datas) {
+          const userFeatureIds = data.payload.datas.map((feature) =>
+            feature.id_fitur.toString()
+          );
+          setUserFeatures(userFeatureIds);
+          setupdateUser((prev) => ({
+            ...prev,
+            fiturIds: userFeatureIds,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching user features:", error);
+      }
+    };
+
+    fetchUserFeatures();
+  }, [endPointUserFitur]);
 
   useEffect(() => {
     const getFetchData = async () => {
@@ -21,27 +49,54 @@ const EditUser = () => {
         const response = await fetch(endPoint);
         const data = await response.json();
 
-        // Cek apakah ada data yang didapatkan dan validasi panjang array
         if (data.payload?.datas && data.payload.datas.length > 0) {
-          const userData = data.payload.datas[0]; // Ambil data pertama jika banyak
+          const userData = data.payload.datas[0];
           setdataUser(userData);
-          setupdateUser({
-            username: userData.username || "", // Set username jika ada, jika tidak, set sebagai string kosong
-            password: userData.password || "", // Set password sebagai string kosong agar bisa diubah
+          setupdateUser((prev) => ({
+            ...prev,
+            username: userData.username || "",
+            password: "",
             role: userData.role || "",
-          });
+          }));
         } else {
           throw new Error("Data user tidak ditemukan");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
         alert("Gagal mengambil data user. Silakan coba lagi.");
-        navigate("/users"); // Redirect ke halaman daftar pengguna jika data gagal diambil
+        navigate("/users");
       }
     };
 
     getFetchData();
   }, [id, endPoint, navigate]);
+
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/v1/features");
+        const data = await response.json();
+        if (response.ok) {
+          setFeatures(data.payload.datas);
+        } else {
+          console.error("Gagal memuat fitur");
+        }
+      } catch (error) {
+        console.error("Error fetching features:", error);
+      }
+    };
+
+    fetchFeatures();
+  }, []);
+
+  useEffect(() => {
+    if (updateUser.role === "admin utama" && features.length > 0) {
+      setupdateUser((prev) => ({
+        ...prev,
+        fiturIds: features.map((feature) => feature.id_fitur.toString()),
+      }));
+    }
+  }, [updateUser.role, features]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,10 +113,8 @@ const EditUser = () => {
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.removeItem("user");
         alert("Data updated successfully!");
-        localStorage.setItem("user", updateUser.username);
-        navigate("/users"); // Navigasi setelah sukses
+        navigate("/users");
       } else {
         alert("Failed to update data: " + result.message);
       }
@@ -72,9 +125,23 @@ const EditUser = () => {
   };
 
   const handleChange = (e) => {
-    setupdateUser({
-      ...updateUser,
-      [e.target.id]: e.target.value,
+    const { id, value } = e.target;
+    setupdateUser((prev) => {
+      const newDataForm = {
+        ...prev,
+        [id]: value,
+      };
+
+      if (value === "admin utama" && features.length > 0) {
+        newDataForm.fiturIds = features.map((feature) =>
+          feature.id_fitur.toString()
+        );
+      } else if (value !== "admin utama") {
+        // Preserve existing feature selections when changing to non-admin utama
+        newDataForm.fiturIds = userFeatures;
+      }
+
+      return newDataForm;
     });
   };
 
@@ -127,9 +194,42 @@ const EditUser = () => {
                   <option value="">Pilih Role</option>
                   <option value="admin utama">Admin Utama</option>
                   <option value="admin kedua">Admin Kedua</option>
-                  <option value="admin ketiga">Admin Ketiga</option>
                 </select>
               </div>
+
+              {updateUser.role !== "admin utama" && (
+                <div className="flex flex-col gap-y-2 md:text-xl">
+                  <label className="text-black font-bold">Fitur</label>
+                  {features.map((feature) => (
+                    <div key={feature.id_fitur} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`feature-${feature.id_fitur}`}
+                        value={feature.id_fitur.toString()}
+                        checked={updateUser.fiturIds.includes(
+                          feature.id_fitur.toString()
+                        )}
+                        onChange={(e) => {
+                          const { value, checked } = e.target;
+                          setupdateUser((prev) => {
+                            const newFiturIds = checked
+                              ? [...prev.fiturIds, value]
+                              : prev.fiturIds.filter((id) => id !== value);
+                            return { ...prev, fiturIds: newFiturIds };
+                          });
+                        }}
+                        className="mr-2"
+                      />
+                      <label
+                        htmlFor={`feature-${feature.id_fitur}`}
+                        className="text-black"
+                      >
+                        {feature.nama_fitur}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="flex gap-x-3 w-full">
                 <button

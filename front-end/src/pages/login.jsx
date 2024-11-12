@@ -7,6 +7,7 @@ const Login = () => {
   });
 
   const [dataAdmin, setDataAdmin] = useState([]);
+  const [adminFitur, setAdminFitur] = useState([]);
 
   const handleChange = (e) => {
     setDataForm({
@@ -21,8 +22,19 @@ const Login = () => {
     setDataAdmin(data.payload.datas);
   };
 
+  const getFitur = async () => {
+    const response = await fetch("http://localhost:3000/api/v1/userFitur");
+    const data = await response.json();
+    if (response.ok) {
+      setAdminFitur(data.payload.datas);
+    } else {
+      console.error("Gagal memuat fitur");
+    }
+  };
+
   useEffect(() => {
     getAdmin();
+    getFitur();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -40,13 +52,30 @@ const Login = () => {
         }),
       });
       const data = await response.json();
+
       if (response.ok) {
         const admin = dataAdmin.find(
           (admin) => admin.username === dataForm.username
         );
-        if (admin) localStorage.setItem("admin", JSON.stringify(admin));
-        alert("Login Berhasil");
-        window.location.href = "/home";
+
+        if (admin) {
+          // Simpan data admin ke localStorage
+          localStorage.setItem("admin", JSON.stringify(admin));
+
+          // Ambil semua fitur yang sesuai dengan user_id admin
+          const fiturs = adminFitur.filter(
+            (fitur) => fitur.user_id === admin.id // gunakan admin.id yang benar
+          );
+
+          if (fiturs.length > 0) {
+            localStorage.setItem("fitur", JSON.stringify(fiturs)); // Simpan semua fitur
+          }
+
+          alert("Login Berhasil");
+          window.location.href = "/home";
+        } else {
+          alert("Admin tidak ditemukan");
+        }
       } else {
         alert("Login Gagal");
         console.log(`Login Gagal: ${data.message}`);
